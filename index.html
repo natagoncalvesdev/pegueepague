@@ -141,6 +141,28 @@
       cursor: not-allowed !important;
     }
 
+    .produto-no-carrinho {
+      background: #d4edda !important;
+      border-left: 4px solid #28a745 !important;
+      box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3) !important;
+    }
+
+    .produto-no-carrinho .produto-nome::before {
+      content: "✓ ";
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .cart-badge {
+      background: #28a745;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+
     .produto-info {
       flex: 1;
     }
@@ -597,11 +619,18 @@ function renderProdutos() {
 
   // Renderizar produtos COM estoque primeiro
   produtosComEstoque.forEach(produto => {
+    const itemCarrinho = carrinho.find(item => item.id === produto.id);
+    const quantidadeCarrinho = itemCarrinho ? itemCarrinho.quantidade : 0;
+    const noCarrinho = quantidadeCarrinho > 0;
+    
     const div = document.createElement('div');
-    div.className = 'produto';
+    div.className = noCarrinho ? 'produto produto-no-carrinho' : 'produto';
     div.innerHTML = `
       <div class="produto-info">
-        <div class="produto-nome">${produto.nome}</div>
+        <div class="produto-nome">
+          ${produto.nome}
+          ${noCarrinho ? `<span class="cart-badge">${quantidadeCarrinho}x</span>` : ''}
+        </div>
         <div class="produto-detalhes">Estoque: ${produto.quantidade} unidades</div>
       </div>
       <div class="produto-preco">R$ ${produto.preco.toFixed(2)}</div>
