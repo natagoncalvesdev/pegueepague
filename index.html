@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pegue e Pague - Sistema de Estoque</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
   <style>
     * {
       margin: 0;
@@ -331,7 +334,7 @@
 
   <div class="view-toggle">
     <button class="btn-toggle active" onclick="showView('cliente')">👤 Área do Cliente</button>
-    <button class="btn-toggle" onclick="showView('admin')">⚙️ Administração</button>
+    <button class="btn-toggle" onclick="mostrarLogin()">⚙️ Administração</button>
   </div>
 
   <!-- VIEW CLIENTE -->
@@ -420,29 +423,82 @@
 </div>
 
 <script>
-// Sistema de Estoque
-let estoque = JSON.parse(localStorage.getItem('estoque')) || [
-  { id: 1, nome: 'Energético Monster', preco: 8.99, quantidade: 20 },
-  { id: 2, nome: 'Paçoca', preco: 0.50, quantidade: 100 },
-  { id: 3, nome: 'Halls', preco: 1.99, quantidade: 50 }
-];
+// Configuração Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyAguTud4KXk9CV6KUR77Ru8xeFK4ml-NGU",
+  authDomain: "pegueepague-d2d21.firebaseapp.com",
+  databaseURL: "https://pegueepague-d2d21-default-rtdb.firebaseio.com",
+  projectId: "pegueepague-d2d21",
+  storageBucket: "pegueepague-d2d21.firebasestorage.app",
+  messagingSenderId: "770178985783",
+  appId: "1:770178985783:web:8a3591340f01578d50b4b2"
+};
 
+// Inicializar Firebase
+let db = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+  console.log('Firebase conectado com sucesso!');
+} catch (error) {
+  console.log('Firebase não configurado ainda. Usando localStorage como fallback.');
+}
+
+// Sistema de Estoque
+let estoque = [];
 let carrinho = [];
 let nextId = 4;
 
-// Salvar estoque no localStorage
+// Salvar estoque (Firebase ou localStorage)
 function salvarEstoque() {
-  localStorage.setItem('estoque', JSON.stringify(estoque));
-  localStorage.setItem('nextId', nextId.toString());
+  if (db) {
+    // Salvar no Firebase
+    db.ref('estoque/produtos').set(estoque);
+    db.ref('estoque/nextId').set(nextId);
+  } else {
+    // Fallback para localStorage
+    localStorage.setItem('estoque', JSON.stringify(estoque));
+    localStorage.setItem('nextId', nextId.toString());
+  }
 }
 
-// Carregar nextId
-function carregarNextId() {
-  const savedId = localStorage.getItem('nextId');
-  if (savedId) {
-    nextId = parseInt(savedId);
+// Carregar estoque (Firebase ou localStorage)
+async function carregarEstoque() {
+  if (db) {
+    // Carregar do Firebase
+    const snapshot = await db.ref('estoque/produtos').once('value');
+    estoque = snapshot.val() || [];
+    
+    const idSnapshot = await db.ref('estoque/nextId').once('value');
+    nextId = idSnapshot.val() || 4;
+    
+    // Se Firebase estiver vazio, inicializar com dados padrão
+    if (estoque.length === 0) {
+      estoque = [
+        { id: 1, nome: 'Energético Monster', preco: 8.99, quantidade: 20 },
+        { id: 2, nome: 'Paçoca', preco: 0.50, quantidade: 100 },
+        { id: 3, nome: 'Halls', preco: 1.99, quantidade: 50 }
+      ];
+      salvarEstoque();
+    }
+    
+    renderProdutos();
   } else {
-    nextId = Math.max(...estoque.map(p => p.id)) + 1;
+    // Fallback para localStorage
+    estoque = JSON.parse(localStorage.getItem('estoque')) || [
+      { id: 1, nome: 'Energético Monster', preco: 8.99, quantidade: 20 },
+      { id: 2, nome: 'Paçoca', preco: 0.50, quantidade: 100 },
+      { id: 3, nome: 'Halls', preco: 1.99, quantidade: 50 }
+    ];
+    
+    const savedId = localStorage.getItem('nextId');
+    if (savedId) {
+      nextId = parseInt(savedId);
+    } else {
+      nextId = Math.max(...estoque.map(p => p.id)) + 1;
+    }
+    
+    renderProdutos();
   }
 }
 
@@ -455,11 +511,50 @@ function showView(view) {
     document.getElementById('viewCliente').classList.add('active');
     document.querySelectorAll('.btn-toggle')[0].classList.add('active');
     renderProdutos();
-  } else {
+  } else if (view === 'admin') {
     document.getElementById('viewAdmin').classList.add('active');
     document.querySelectorAll('.btn-toggle')[1].classList.add('active');
     renderAdminProdutos();
   }
+}
+
+// Mostrar tela de login
+function mostrarLogin() {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+  document.getElementById('viewLogin').classList.add('active');
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('loginUsuario').value = '';
+  document.getElementById('loginSenha').value = '';
+}
+
+// Fazer login
+function fazerLogin() {
+  const usuario = document.getElementById('loginUsuario').value.trim();
+  const senha = document.getElementById('loginSenha').value;
+
+  // Credenciais corretas
+  if (usuario === 'supervisor' && senha === 'senhadosupervisor') {
+    // Login bem-sucedido, mostrar área admin
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('viewAdmin').classList.add('active');
+    document.querySelectorAll('.btn-toggle')[1].classList.add('active');
+    renderAdminProdutos();
+  } else {
+    // Erro de login
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginSenha').value = '';
+  }
+}
+
+// Voltar para área do cliente
+function voltarParaCliente() {
+  showView('cliente');
+}
+
+// Logout
+function logout() {
+  mostrarLogin();
 }
 
 // Renderizar produtos na view cliente
@@ -756,9 +851,7 @@ function gerarCRC16(str) {
 }
 
 // Inicializar
-carregarNextId();
-salvarEstoque();
-renderProdutos();
+carregarEstoque();
 </script>
 
 </body>
