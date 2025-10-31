@@ -353,6 +353,23 @@
       background: #28a745;
     }
 
+    /* Notificações de sugestões */
+    .notif-btn {
+      position: relative;
+    }
+    .notif-count {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #dc3545;
+      color: #fff;
+      border-radius: 12px;
+      padding: 2px 6px;
+      font-size: 12px;
+      font-weight: bold;
+      display: none;
+    }
+
     @media (max-width: 600px) {
       .produto {
         flex-direction: column;
@@ -414,6 +431,20 @@
       <h3>Seu Carrinho:</h3>
       <div id="cartItems"></div>
     </div>
+
+    <!-- SUGESTÕES - CLIENTE -->
+    <div class="admin-form" style="margin-top:20px;">
+      <h3>💬 Enviar Sugestão</h3>
+      <div class="form-group">
+        <label>Seu Nome</label>
+        <input type="text" id="sugestaoNome" placeholder="Digite seu nome" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Sugestão</label>
+        <input type="text" id="sugestaoTexto" placeholder="Digite sua sugestão" autocomplete="off">
+      </div>
+      <button class="btn btn-success" onclick="enviarSugestao()">📨 Enviar Sugestão</button>
+    </div>
   </div>
 
   <!-- VIEW LOGIN -->
@@ -441,10 +472,24 @@
   <!-- VIEW ADMIN -->
   <div id="viewAdmin" class="view">
     <div style="text-align: right; margin-bottom: 15px;">
+      <button class="btn btn-secondary notif-btn" onclick="toggleSugestoes()" style="margin-right:10px;">
+        💬 Sugestões <span id="sugestoesBadge" class="notif-count">0</span>
+      </button>
       <button class="btn btn-secondary" onclick="logout()">🚪 Sair</button>
     </div>
     <h2>⚙️ Gerenciar Produtos</h2>
     
+    <!-- LISTA DE SUGESTÕES - ADMIN -->
+    <div id="sugestoesContainer" class="admin-form" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3>💬 Sugestões</h3>
+        <div>
+          <button class="btn btn-warning" onclick="marcarTodasComoLidas()">✔️ Marcar todas como lidas</button>
+        </div>
+      </div>
+      <div id="sugestoesList"></div>
+    </div>
+
     <div class="admin-form">
       <h3>➕ Adicionar Novo Produto</h3>
       <div class="form-group">
@@ -496,6 +541,9 @@ let estoque = [];
 let carrinho = [];
 let nextId = 4;
 
+// Sistema de Sugestões
+let sugestoes = [];
+
 // Salvar estoque (Firebase ou localStorage)
 function salvarEstoque() {
   if (db) {
@@ -506,6 +554,119 @@ function salvarEstoque() {
     // Fallback para localStorage
     localStorage.setItem('estoque', JSON.stringify(estoque));
     localStorage.setItem('nextId', nextId.toString());
+  }
+}
+
+// Salvar sugestões (Firebase ou localStorage)
+function salvarSugestoes() {
+  if (db) {
+    db.ref('sugestoes').set(sugestoes);
+  } else {
+    localStorage.setItem('sugestoes', JSON.stringify(sugestoes));
+  }
+}
+
+// Carregar sugestões (Firebase ou localStorage)
+async function carregarSugestoes() {
+  if (db) {
+    const snapshot = await db.ref('sugestoes').once('value');
+    sugestoes = snapshot.val() || [];
+  } else {
+    sugestoes = JSON.parse(localStorage.getItem('sugestoes')) || [];
+  }
+  atualizarBadgeSugestoes();
+}
+
+// Enviar sugestão (cliente)
+function enviarSugestao() {
+  const nome = document.getElementById('sugestaoNome').value.trim();
+  const texto = document.getElementById('sugestaoTexto').value.trim();
+  if (!nome || !texto) {
+    alert('Informe seu nome e sua sugestão.');
+    return;
+  }
+  const nova = {
+    id: Date.now(),
+    nome: nome,
+    texto: texto,
+    lida: false,
+    criadoEm: new Date().toISOString()
+  };
+  sugestoes.unshift(nova);
+  salvarSugestoes();
+  atualizarBadgeSugestoes();
+  document.getElementById('sugestaoNome').value = '';
+  document.getElementById('sugestaoTexto').value = '';
+  alert('Sugestão enviada! Obrigado.');
+}
+
+// Atualiza badge de sugestões não lidas (apenas admin vê)
+function atualizarBadgeSugestoes() {
+  const naoLidas = sugestoes.filter(s => !s.lida).length;
+  const badge = document.getElementById('sugestoesBadge');
+  if (!badge) return;
+  if (naoLidas > 0) {
+    badge.textContent = naoLidas.toString();
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// Alterna exibição das sugestões no admin
+function toggleSugestoes() {
+  const cont = document.getElementById('sugestoesContainer');
+  if (!cont) return;
+  const visivel = cont.style.display !== 'none';
+  cont.style.display = visivel ? 'none' : 'block';
+  if (!visivel) {
+    renderSugestoesAdmin();
+  }
+}
+
+// Renderiza lista de sugestões no admin
+function renderSugestoesAdmin() {
+  const list = document.getElementById('sugestoesList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (sugestoes.length === 0) {
+    list.innerHTML = '<p style="text-align:center; padding:10px;">Nenhuma sugestão recebida.</p>';
+    return;
+  }
+  sugestoes.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'produto';
+    div.style.marginBottom = '10px';
+    div.innerHTML = `
+      <div class="produto-info">
+        <div class="produto-nome">${s.nome} ${!s.lida ? '<span class="badge">novo</span>' : ''}</div>
+        <div class="produto-detalhes">${new Date(s.criadoEm).toLocaleString()}</div>
+        <div style="margin-top:8px; color:#333;">${s.texto}</div>
+      </div>
+      <div class="produto-actions">
+        ${s.lida ? '' : `<button class="btn btn-success" onclick="marcarSugestaoComoLida(${s.id})">✔️ Marcar como lida</button>`}
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function marcarSugestaoComoLida(id) {
+  const s = sugestoes.find(x => x.id === id);
+  if (!s) return;
+  s.lida = true;
+  salvarSugestoes();
+  atualizarBadgeSugestoes();
+  renderSugestoesAdmin();
+}
+
+function marcarTodasComoLidas() {
+  let mudou = false;
+  sugestoes.forEach(s => { if (!s.lida) { s.lida = true; mudou = true; } });
+  if (mudou) {
+    salvarSugestoes();
+    atualizarBadgeSugestoes();
+    renderSugestoesAdmin();
   }
 }
 
@@ -587,6 +748,7 @@ function fazerLogin() {
     document.getElementById('viewAdmin').classList.add('active');
     document.querySelectorAll('.btn-toggle')[1].classList.add('active');
     renderAdminProdutos();
+    atualizarBadgeSugestoes();
   } else {
     // Erro de login
     document.getElementById('loginError').style.display = 'block';
@@ -958,6 +1120,7 @@ function gerarCRC16(str) {
 
 // Inicializar
 carregarEstoque();
+carregarSugestoes();
 </script>
 
 </body>
