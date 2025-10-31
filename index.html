@@ -405,6 +405,17 @@
         padding: 12px;
         margin: 8px 0;
       }
+
+      /* Espaçamento entre botões de ação no mobile */
+      .action-buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      .action-buttons .btn {
+        margin-left: 0 !important;
+      }
     }
   </style>
 </head>
@@ -430,7 +441,7 @@
       <div class="total-sub">Produtos no carrinho: <span id="totalItens">0</span></div>
     </div>
 
-    <div style="text-align:center;">
+    <div class="action-buttons" style="text-align:center;">
       <button class="btn btn-success" onclick="gerarPix()" style="padding: 15px 30px; font-size: 18px;">
         💳 Gerar QR Code PIX
       </button>
