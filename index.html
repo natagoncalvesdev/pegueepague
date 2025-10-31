@@ -516,6 +516,7 @@
         <h3>💬 Sugestões</h3>
         <div>
           <button class="btn btn-warning" onclick="marcarTodasComoLidas()">✔️ Marcar todas como lidas</button>
+          <button class="btn btn-danger" onclick="apagarSugestoesLidas()" style="margin-left:8px;">🗑️ Apagar lidas</button>
         </div>
       </div>
       <div id="sugestoesList"></div>
@@ -675,6 +676,7 @@ function renderSugestoesAdmin() {
       </div>
       <div class="produto-actions">
         ${s.lida ? '' : `<button class="btn btn-success" onclick="marcarSugestaoComoLida(${s.id})">✔️ Marcar como lida</button>`}
+        ${s.lida ? `<button class=\"btn btn-danger\" onclick=\"apagarSugestao(${s.id})\">🗑️ Apagar</button>` : ''}
       </div>
     `;
     list.appendChild(div);
@@ -728,6 +730,23 @@ function adicionarSugestao(nova) {
     localStorage.setItem('sugestoes', JSON.stringify(novaLista));
     sugestoes = novaLista;
     atualizarBadgeSugestoes();
+  }
+}
+
+function apagarSugestao(id) {
+  sugestoes = sugestoes.filter(s => s.id !== id);
+  salvarSugestoes();
+  atualizarBadgeSugestoes();
+  renderSugestoesAdmin();
+}
+
+function apagarSugestoesLidas() {
+  const antes = sugestoes.length;
+  sugestoes = sugestoes.filter(s => !s.lida);
+  if (sugestoes.length !== antes) {
+    salvarSugestoes();
+    atualizarBadgeSugestoes();
+    renderSugestoesAdmin();
   }
 }
 
