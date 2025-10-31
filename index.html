@@ -623,9 +623,7 @@ function enviarSugestao() {
     lida: false,
     criadoEm: new Date().toISOString()
   };
-  sugestoes.unshift(nova);
-  salvarSugestoes();
-  atualizarBadgeSugestoes();
+  adicionarSugestao(nova);
   document.getElementById('sugestaoNome').value = '';
   document.getElementById('sugestaoTexto').value = '';
   alert('Sugestão enviada! Obrigado.');
@@ -698,6 +696,37 @@ function marcarTodasComoLidas() {
     salvarSugestoes();
     atualizarBadgeSugestoes();
     renderSugestoesAdmin();
+  }
+}
+
+// Adicionar sugestão de forma atômica (evita sobrescrever leituras anteriores)
+function adicionarSugestao(nova) {
+  if (db) {
+    firebase.database().ref('sugestoes').transaction(curr => {
+      const listaAtual = Array.isArray(curr) ? curr : [];
+      return [nova, ...listaAtual];
+    }, undefined, false).then(() => {
+      // Recarrega do servidor para manter flags 'lida' corretas
+      carregarSugestoes();
+      atualizarBadgeSugestoes();
+    }).catch(() => {
+      // Fallback: se transação falhar por algum motivo, usa leitura+gravação simples
+      db.ref('sugestoes').once('value').then(snap => {
+        const lista = Array.isArray(snap.val()) ? snap.val() : [];
+        const novaLista = [nova, ...lista];
+        return db.ref('sugestoes').set(novaLista);
+      }).then(() => {
+        carregarSugestoes();
+        atualizarBadgeSugestoes();
+      });
+    });
+  } else {
+    // localStorage: lê o estado mais recente e preserva 'lida'
+    const lista = JSON.parse(localStorage.getItem('sugestoes')) || [];
+    const novaLista = [nova, ...lista];
+    localStorage.setItem('sugestoes', JSON.stringify(novaLista));
+    sugestoes = novaLista;
+    atualizarBadgeSugestoes();
   }
 }
 
