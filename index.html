@@ -1,103 +1,630 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pegue e Pague</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f8f9fa;
-    margin: 20px;
-  }
-  h1 {
-    text-align: center;
-    color: #333;
-  }
-  .produto {
-    display: flex;
-    justify-content: space-between;
-    background: #fff;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  button {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  button:hover {
-    background: #218838;
-  }
-  #total {
-    font-size: 1.3em;
-    font-weight: bold;
-    text-align: center;
-    margin-top: 20px;
-  }
-  #pixArea {
-    text-align: center;
-    margin-top: 25px;
-  }
-  #pixCode {
-    word-wrap: break-word;
-    background: #fff;
-    padding: 10px;
-    border-radius: 8px;
-    margin-top: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pegue e Pague - Sistema de Estoque</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+      padding: 20px;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .view-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn-toggle {
+      background: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .btn-toggle.active {
+      background: #28a745;
+      color: white;
+    }
+
+    .view {
+      display: none;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .produto {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8f9fa;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 12px;
+      transition: all 0.3s;
+      border-left: 4px solid #28a745;
+    }
+
+    .produto:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .produto-info {
+      flex: 1;
+    }
+
+    .produto-nome {
+      font-weight: bold;
+      font-size: 1.1em;
+      color: #333;
+    }
+
+    .produto-detalhes {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .produto-preco {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #28a745;
+      margin-right: 15px;
+    }
+
+    .produto-actions {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .btn {
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #007bff;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0056b3;
+    }
+
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #218838;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+    }
+
+    .btn-warning {
+      background: #ffc107;
+      color: #333;
+    }
+
+    .btn-warning:hover {
+      background: #e0a800;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .quantidade-input {
+      width: 50px;
+      text-align: center;
+      padding: 8px;
+      border: 2px solid #28a745;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .total-container {
+      text-align: center;
+      margin: 30px 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 15px;
+    }
+
+    .total {
+      font-size: 2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .total-sub {
+      font-size: 1em;
+      opacity: 0.9;
+    }
+
+    #pixArea {
+      text-align: center;
+      margin-top: 25px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 15px;
+    }
+
+    #pixCode {
+      word-wrap: break-word;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .admin-form {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #28a745;
+    }
+
+    .cart-container {
+      margin-top: 20px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin: 5px 0;
+    }
+
+    .badge {
+      background: #dc3545;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: bold;
+    }
+
+    .badge-success {
+      background: #28a745;
+    }
+
+    @media (max-width: 600px) {
+      .produto {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .produto-actions {
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      .produto-preco {
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<h1>🥤 Pegue e Pague</h1>
+<div class="container">
+  <div class="header">
+    <h1>🛒 Pegue e Pague</h1>
+    <p>Sistema de Estoque Inteligente</p>
+  </div>
 
-<div class="produto">
-  <span>Energético Monster</span>
-  <button onclick="addProduto(8.99)">Adicionar - R$8,99</button>
-</div>
+  <div class="view-toggle">
+    <button class="btn-toggle active" onclick="showView('cliente')">👤 Área do Cliente</button>
+    <button class="btn-toggle" onclick="showView('admin')">⚙️ Administração</button>
+  </div>
 
-<div class="produto">
-  <span>Paçoca</span>
-  <button onclick="addProduto(0.50)">Adicionar - R$0,50</button>
-</div>
+  <!-- VIEW CLIENTE -->
+  <div id="viewCliente" class="view active">
+    <div id="produtosList"></div>
+    
+    <div class="total-container">
+      <div class="total">Total: R$ <span id="total">0,00</span></div>
+      <div class="total-sub">Produtos no carrinho: <span id="totalItens">0</span></div>
+    </div>
 
-<div class="produto">
-  <span>Halls</span>
-  <button onclick="addProduto(1.99)">Adicionar - R$1,99</button>
-</div>
+    <div style="text-align:center;">
+      <button class="btn btn-success" onclick="gerarPix()" style="padding: 15px 30px; font-size: 18px;">
+        💳 Gerar QR Code PIX
+      </button>
+      <button class="btn btn-secondary" onclick="limparCarrinho()" style="padding: 15px 30px; font-size: 18px; margin-left: 10px;">
+        🗑️ Limpar Carrinho
+      </button>
+    </div>
 
-<div id="total">Total: R$ 0,00</div>
+    <div id="pixArea" style="display:none;">
+      <div id="qrcode"></div>
+      <div id="pixCode"></div>
+      <button class="btn btn-success" onclick="copiarPix()" style="margin-top: 15px;">
+        📋 Copiar Código PIX
+      </button>
+    </div>
 
-<div style="text-align:center; margin-top:15px;">
-  <button style="background:#007bff;" onclick="gerarPix()">Gerar QR Code PIX</button>
-</div>
+    <div id="carrinho" class="cart-container" style="display:none;">
+      <h3>Seu Carrinho:</h3>
+      <div id="cartItems"></div>
+    </div>
+  </div>
 
-<div id="pixArea">
-  <div id="qrcode"></div>
-  <div id="pixCode"></div>
+  <!-- VIEW ADMIN -->
+  <div id="viewAdmin" class="view">
+    <h2>⚙️ Gerenciar Produtos</h2>
+    
+    <div class="admin-form">
+      <h3>➕ Adicionar Novo Produto</h3>
+      <div class="form-group">
+        <label>Nome do Produto</label>
+        <input type="text" id="produtoNome" placeholder="Ex: Coca-Cola 350ml">
+      </div>
+      <div class="form-group">
+        <label>Preço (R$)</label>
+        <input type="number" id="produtoPreco" step="0.01" placeholder="Ex: 5.50" min="0">
+      </div>
+      <div class="form-group">
+        <label>Quantidade em Estoque</label>
+        <input type="number" id="produtoQuantidade" placeholder="Ex: 50" min="0">
+      </div>
+      <button class="btn btn-success" onclick="adicionarProduto()">➕ Adicionar Produto</button>
+    </div>
+
+    <div>
+      <h3>📦 Lista de Produtos</h3>
+      <div id="adminProdutosList"></div>
+    </div>
+  </div>
 </div>
 
 <script>
-let total = 0;
+// Sistema de Estoque
+let estoque = JSON.parse(localStorage.getItem('estoque')) || [
+  { id: 1, nome: 'Energético Monster', preco: 8.99, quantidade: 20 },
+  { id: 2, nome: 'Paçoca', preco: 0.50, quantidade: 100 },
+  { id: 3, nome: 'Halls', preco: 1.99, quantidade: 50 }
+];
 
-function addProduto(valor) {
-  total += valor;
-  document.getElementById("total").innerText = "Total: R$ " + total.toFixed(2);
+let carrinho = [];
+let nextId = 4;
+
+// Salvar estoque no localStorage
+function salvarEstoque() {
+  localStorage.setItem('estoque', JSON.stringify(estoque));
+  localStorage.setItem('nextId', nextId.toString());
 }
 
-function gerarPix() {
-  if (total === 0) {
-    alert("Selecione pelo menos um produto!");
+// Carregar nextId
+function carregarNextId() {
+  const savedId = localStorage.getItem('nextId');
+  if (savedId) {
+    nextId = parseInt(savedId);
+  } else {
+    nextId = Math.max(...estoque.map(p => p.id)) + 1;
+  }
+}
+
+// Navegação de views
+function showView(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+  
+  if (view === 'cliente') {
+    document.getElementById('viewCliente').classList.add('active');
+    document.querySelectorAll('.btn-toggle')[0].classList.add('active');
+    renderProdutos();
+  } else {
+    document.getElementById('viewAdmin').classList.add('active');
+    document.querySelectorAll('.btn-toggle')[1].classList.add('active');
+    renderAdminProdutos();
+  }
+}
+
+// Renderizar produtos na view cliente
+function renderProdutos() {
+  const container = document.getElementById('produtosList');
+  container.innerHTML = '';
+
+  if (estoque.length === 0) {
+    container.innerHTML = '<p style="text-align:center; padding:20px;">Nenhum produto disponível no momento.</p>';
     return;
   }
+
+  estoque.forEach(produto => {
+    if (produto.quantidade > 0) {
+      const div = document.createElement('div');
+      div.className = 'produto';
+      div.innerHTML = `
+        <div class="produto-info">
+          <div class="produto-nome">${produto.nome}</div>
+          <div class="produto-detalhes">Estoque: ${produto.quantidade} unidades</div>
+        </div>
+        <div class="produto-preco">R$ ${produto.preco.toFixed(2)}</div>
+        <div class="produto-actions">
+          <button class="btn btn-success" onclick="adicionarAoCarrinho(${produto.id})">➕ Adicionar</button>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+  });
+}
+
+// Renderizar produtos na view admin
+function renderAdminProdutos() {
+  const container = document.getElementById('adminProdutosList');
+  container.innerHTML = '';
+
+  if (estoque.length === 0) {
+    container.innerHTML = '<p style="text-align:center; padding:20px;">Nenhum produto cadastrado.</p>';
+    return;
+  }
+
+  estoque.forEach(produto => {
+    const div = document.createElement('div');
+    div.className = 'produto';
+    div.innerHTML = `
+      <div class="produto-info">
+        <div class="produto-nome">${produto.nome}</div>
+        <div class="produto-detalhes">Preço: R$ ${produto.preco.toFixed(2)} | Estoque: ${produto.quantidade} unidades</div>
+      </div>
+      <div class="produto-actions">
+        <input type="number" class="quantidade-input" id="qtdEdit_${produto.id}" value="${produto.quantidade}" min="0">
+        <input type="number" class="quantidade-input" id="precoEdit_${produto.id}" value="${produto.preco}" step="0.01" min="0">
+        <button class="btn btn-warning" onclick="salvarEdicao(${produto.id})">💾 Salvar</button>
+        <button class="btn btn-danger" onclick="removerProduto(${produto.id})">🗑️ Excluir</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// Adicionar produto ao carrinho
+function adicionarAoCarrinho(id) {
+  const produto = estoque.find(p => p.id === id);
+  if (!produto) return;
+
+  if (produto.quantidade <= 0) {
+    alert('Produto sem estoque!');
+    return;
+  }
+
+  const itemCarrinho = carrinho.find(item => item.id === id);
+  
+  if (itemCarrinho) {
+    if (itemCarrinho.quantidade >= produto.quantidade) {
+      alert('Quantidade máxima disponível atingida!');
+      return;
+    }
+    itemCarrinho.quantidade++;
+  } else {
+    carrinho.push({ ...produto, quantidade: 1 });
+  }
+
+  atualizarCarrinho();
+  renderProdutos();
+}
+
+// Atualizar visualização do carrinho
+function atualizarCarrinho() {
+  let total = 0;
+  let totalItens = 0;
+
+  carrinho.forEach(item => {
+    total += item.preco * item.quantidade;
+    totalItens += item.quantidade;
+  });
+
+  document.getElementById('total').textContent = total.toFixed(2);
+  document.getElementById('totalItens').textContent = totalItens;
+
+  // Renderizar itens do carrinho
+  const cartContainer = document.getElementById('cartItems');
+  const carrinhoDiv = document.getElementById('carrinho');
+  
+  if (carrinho.length > 0) {
+    carrinhoDiv.style.display = 'block';
+    cartContainer.innerHTML = '';
+    
+    carrinho.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'cart-item';
+      div.innerHTML = `
+        <div>
+          <strong>${item.nome}</strong>
+          <span class="badge">x${item.quantidade}</span>
+        </div>
+        <div>
+          R$ ${(item.preco * item.quantidade).toFixed(2)}
+          <button class="btn btn-danger" onclick="removerDoCarrinho(${item.id})" style="margin-left: 10px; padding: 4px 8px;">❌</button>
+        </div>
+      `;
+      cartContainer.appendChild(div);
+    });
+  } else {
+    carrinhoDiv.style.display = 'none';
+  }
+}
+
+// Remover do carrinho
+function removerDoCarrinho(id) {
+  const itemIndex = carrinho.findIndex(item => item.id === id);
+  if (itemIndex !== -1) {
+    carrinho[itemIndex].quantidade--;
+    if (carrinho[itemIndex].quantidade <= 0) {
+      carrinho.splice(itemIndex, 1);
+    }
+  }
+  atualizarCarrinho();
+  renderProdutos();
+}
+
+// Limpar carrinho
+function limparCarrinho() {
+  carrinho = [];
+  atualizarCarrinho();
+  renderProdutos();
+}
+
+// Adicionar produto (admin)
+function adicionarProduto() {
+  const nome = document.getElementById('produtoNome').value.trim();
+  const preco = parseFloat(document.getElementById('produtoPreco').value);
+  const quantidade = parseInt(document.getElementById('produtoQuantidade').value);
+
+  if (!nome || preco < 0 || quantidade < 0) {
+    alert('Preencha todos os campos corretamente!');
+    return;
+  }
+
+  estoque.push({
+    id: nextId++,
+    nome: nome,
+    preco: preco,
+    quantidade: quantidade
+  });
+
+  salvarEstoque();
+  renderAdminProdutos();
+  
+  // Limpar formulário
+  document.getElementById('produtoNome').value = '';
+  document.getElementById('produtoPreco').value = '';
+  document.getElementById('produtoQuantidade').value = '';
+  
+  alert('Produto adicionado com sucesso!');
+}
+
+// Salvar edição (admin)
+function salvarEdicao(id) {
+  const produto = estoque.find(p => p.id === id);
+  if (!produto) return;
+
+  const novaQuantidade = parseInt(document.getElementById(`qtdEdit_${id}`).value);
+  const novoPreco = parseFloat(document.getElementById(`precoEdit_${id}`).value);
+
+  if (novaQuantidade < 0 || novoPreco < 0) {
+    alert('Valores inválidos!');
+    return;
+  }
+
+  produto.quantidade = novaQuantidade;
+  produto.preco = novoPreco;
+
+  salvarEstoque();
+  renderAdminProdutos();
+  alert('Produto atualizado com sucesso!');
+}
+
+// Remover produto (admin)
+function removerProduto(id) {
+  if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+
+  estoque = estoque.filter(p => p.id !== id);
+  salvarEstoque();
+  renderAdminProdutos();
+}
+
+// Gerar PIX
+function gerarPix() {
+  if (carrinho.length === 0) {
+    alert('Adicione produtos ao carrinho primeiro!');
+    return;
+  }
+
+  const total = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
 
   // Dados PIX
   const chave = "09518875995";
@@ -109,17 +636,35 @@ function gerarPix() {
   const pixPayload = gerarPayload(chave, nome, cidade, valor);
 
   // Exibe QR Code
-  document.getElementById("qrcode").innerHTML = "";
-  new QRCode(document.getElementById("qrcode"), {
+  document.getElementById('qrcode').innerHTML = '';
+  document.getElementById('pixArea').style.display = 'block';
+  
+  new QRCode(document.getElementById('qrcode'), {
     text: pixPayload,
-    width: 200,
-    height: 200
+    width: 250,
+    height: 250,
+    colorDark: '#000000',
+    colorLight: '#ffffff'
   });
 
   // Exibe o código copia e cola
-  document.getElementById("pixCode").innerText = pixPayload;
+  document.getElementById('pixCode').textContent = pixPayload;
+  
+  // Scroll suave até o QR Code
+  document.getElementById('pixArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// Copiar código PIX
+function copiarPix() {
+  const pixCode = document.getElementById('pixCode').textContent;
+  navigator.clipboard.writeText(pixCode).then(() => {
+    alert('Código PIX copiado para a área de transferência!');
+  }).catch(() => {
+    alert('Erro ao copiar. Selecione manualmente o código.');
+  });
+}
+
+// Gerar payload PIX
 function gerarPayload(chave, nome, cidade, valor) {
   function tamanho(str) {
     return (str.length < 10 ? "0" : "") + str.length;
@@ -143,6 +688,7 @@ function gerarPayload(chave, nome, cidade, valor) {
   return brcode + crc;
 }
 
+// Calcular CRC16
 function gerarCRC16(str) {
   const polinomio = 0x1021;
   let resultado = 0xFFFF;
@@ -159,6 +705,11 @@ function gerarCRC16(str) {
   }
   return resultado.toString(16).toUpperCase().padStart(4, "0");
 }
+
+// Inicializar
+carregarNextId();
+salvarEstoque();
+renderProdutos();
 </script>
 
 </body>
