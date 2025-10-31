@@ -117,6 +117,30 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
+    .produto-sem-estoque {
+      background: #e9ecef !important;
+      opacity: 0.7;
+      border-left: 4px solid #6c757d !important;
+    }
+
+    .produto-sem-estoque .produto-nome {
+      color: #6c757d !important;
+      text-decoration: line-through;
+    }
+
+    .produto-sem-estoque .produto-detalhes {
+      color: #adb5bd !important;
+    }
+
+    .produto-sem-estoque .produto-preco {
+      color: #6c757d !important;
+    }
+
+    .produto-sem-estoque button {
+      opacity: 0.5;
+      cursor: not-allowed !important;
+    }
+
     .produto-info {
       flex: 1;
     }
@@ -567,23 +591,51 @@ function renderProdutos() {
     return;
   }
 
-  estoque.forEach(produto => {
-    if (produto.quantidade > 0) {
-      const div = document.createElement('div');
-      div.className = 'produto';
-      div.innerHTML = `
-        <div class="produto-info">
-          <div class="produto-nome">${produto.nome}</div>
-          <div class="produto-detalhes">Estoque: ${produto.quantidade} unidades</div>
-        </div>
-        <div class="produto-preco">R$ ${produto.preco.toFixed(2)}</div>
-        <div class="produto-actions">
-          <button class="btn btn-success" onclick="adicionarAoCarrinho(${produto.id})">➕ Adicionar</button>
-        </div>
-      `;
-      container.appendChild(div);
-    }
+  // Separar produtos com estoque e sem estoque
+  const produtosComEstoque = estoque.filter(p => p.quantidade > 0);
+  const produtosSemEstoque = estoque.filter(p => p.quantidade <= 0);
+
+  // Renderizar produtos COM estoque primeiro
+  produtosComEstoque.forEach(produto => {
+    const div = document.createElement('div');
+    div.className = 'produto';
+    div.innerHTML = `
+      <div class="produto-info">
+        <div class="produto-nome">${produto.nome}</div>
+        <div class="produto-detalhes">Estoque: ${produto.quantidade} unidades</div>
+      </div>
+      <div class="produto-preco">R$ ${produto.preco.toFixed(2)}</div>
+      <div class="produto-actions">
+        <button class="btn btn-success" onclick="adicionarAoCarrinho(${produto.id})">➕ Adicionar</button>
+      </div>
+    `;
+    container.appendChild(div);
   });
+
+  // Renderizar produtos SEM estoque no final (cinza)
+  produtosSemEstoque.forEach(produto => {
+    const div = document.createElement('div');
+    div.className = 'produto produto-sem-estoque';
+    div.innerHTML = `
+      <div class="produto-info">
+        <div class="produto-nome">${produto.nome}</div>
+        <div class="produto-detalhes">Esgotado</div>
+      </div>
+      <div class="produto-preco">R$ ${produto.preco.toFixed(2)}</div>
+      <div class="produto-actions">
+        <button class="btn btn-success" disabled>Indisponível</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  // Se não houver produtos disponíveis, mostrar mensagem
+  if (produtosComEstoque.length === 0 && produtosSemEstoque.length > 0) {
+    const mensagemDiv = document.createElement('div');
+    mensagemDiv.style.cssText = 'text-align:center; padding:20px; color:#dc3545; font-weight:bold;';
+    mensagemDiv.textContent = '⚠️ Todos os produtos estão esgotados!';
+    container.insertBefore(mensagemDiv, container.firstChild);
+  }
 }
 
 // Renderizar produtos na view admin
@@ -770,16 +822,33 @@ function gerarPix() {
 
   const total = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
 
-  // Dados PIX
+  // DADOS PIX
   const chave = "09518875995";
   const nome = "Pegue e Pague";
   const cidade = "APUCARANA";
   const valor = total.toFixed(2);
 
-  // Gera o payload PIX
+  // ABAIXAR ESTOQUE DOS PRODUTOS COMPRADOS
+  carrinho.forEach(itemCarrinho => {
+    const produtoEstoque = estoque.find(p => p.id === itemCarrinho.id);
+    if (produtoEstoque) {
+      produtoEstoque.quantidade -= itemCarrinho.quantidade;
+      if (produtoEstoque.quantidade < 0) {
+        produtoEstoque.quantidade = 0; // Garantir que não fique negativo
+      }
+    }
+  });
+
+  // SALVAR ESTOQUE ATUALIZADO
+  salvarEstoque();
+  
+  // ATUALIZAR INTERFACE
+  renderProdutos();
+
+  // GERA O PAYLOAD PIX
   const pixPayload = gerarPayload(chave, nome, cidade, valor);
 
-  // Exibe QR Code
+  // EXIBE QR CODE
   document.getElementById('qrcode').innerHTML = '';
   document.getElementById('pixArea').style.display = 'block';
   
@@ -791,11 +860,18 @@ function gerarPix() {
     colorLight: '#ffffff'
   });
 
-  // Exibe o código copia e cola
+  // EXIBE O CÓDIGO COPIA E COLA
   document.getElementById('pixCode').textContent = pixPayload;
   
-  // Scroll suave até o QR Code
+  // SCROLL SUAVE ATÉ O QR CODE
   document.getElementById('pixArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  
+  // LIMPAR CARRINHO APÓS GERAR PIX
+  setTimeout(() => {
+    carrinho = [];
+    atualizarCarrinho();
+    alert('Compra finalizada! Estoque atualizado.');
+  }, 1000);
 }
 
 // Copiar código PIX
