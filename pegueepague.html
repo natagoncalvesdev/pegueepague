@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pegue e Pague</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f8f9fa;
+    margin: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+  .produto {
+    display: flex;
+    justify-content: space-between;
+    background: #fff;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  button {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #218838;
+  }
+  #total {
+    font-size: 1.3em;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 20px;
+  }
+  #pixArea {
+    text-align: center;
+    margin-top: 25px;
+  }
+  #pixCode {
+    word-wrap: break-word;
+    background: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+</style>
+</head>
+<body>
+
+<h1>🥤 Pegue e Pague</h1>
+
+<div class="produto">
+  <span>Energético Monster</span>
+  <button onclick="addProduto(8.99)">Adicionar - R$8,99</button>
+</div>
+
+<div class="produto">
+  <span>Paçoca</span>
+  <button onclick="addProduto(0.50)">Adicionar - R$0,50</button>
+</div>
+
+<div class="produto">
+  <span>Halls</span>
+  <button onclick="addProduto(1.99)">Adicionar - R$1,99</button>
+</div>
+
+<div id="total">Total: R$ 0,00</div>
+
+<div style="text-align:center; margin-top:15px;">
+  <button style="background:#007bff;" onclick="gerarPix()">Gerar QR Code PIX</button>
+</div>
+
+<div id="pixArea">
+  <div id="qrcode"></div>
+  <div id="pixCode"></div>
+</div>
+
+<script>
+let total = 0;
+
+function addProduto(valor) {
+  total += valor;
+  document.getElementById("total").innerText = "Total: R$ " + total.toFixed(2);
+}
+
+function gerarPix() {
+  if (total === 0) {
+    alert("Selecione pelo menos um produto!");
+    return;
+  }
+
+  // Dados PIX
+  const chave = "09518875995";
+  const nome = "Pegue e Pague";
+  const cidade = "APUCARANA";
+  const valor = total.toFixed(2);
+
+  // Gera o payload PIX
+  const pixPayload = gerarPayload(chave, nome, cidade, valor);
+
+  // Exibe QR Code
+  document.getElementById("qrcode").innerHTML = "";
+  new QRCode(document.getElementById("qrcode"), {
+    text: pixPayload,
+    width: 200,
+    height: 200
+  });
+
+  // Exibe o código copia e cola
+  document.getElementById("pixCode").innerText = pixPayload;
+}
+
+function gerarPayload(chave, nome, cidade, valor) {
+  function tamanho(str) {
+    return (str.length < 10 ? "0" : "") + str.length;
+  }
+
+  const brcode = 
+    "000201" +
+    "26" + tamanho("0014BR.GOV.BCB.PIX01" + tamanho(chave) + chave) +
+    "0014BR.GOV.BCB.PIX01" + tamanho(chave) + chave +
+    "52040000" +
+    "5303986" +
+    "54" + tamanho(valor) + valor +
+    "5802BR" +
+    "59" + tamanho(nome) + nome +
+    "60" + tamanho(cidade) + cidade +
+    "62070503***" +
+    "6304";
+
+  // Calcula CRC16
+  const crc = gerarCRC16(brcode);
+  return brcode + crc;
+}
+
+function gerarCRC16(str) {
+  const polinomio = 0x1021;
+  let resultado = 0xFFFF;
+  for (let i = 0; i < str.length; i++) {
+    resultado ^= str.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      if (resultado & 0x8000) {
+        resultado = (resultado << 1) ^ polinomio;
+      } else {
+        resultado <<= 1;
+      }
+      resultado &= 0xFFFF;
+    }
+  }
+  return resultado.toString(16).toUpperCase().padStart(4, "0");
+}
+</script>
+
+</body>
+</html>
