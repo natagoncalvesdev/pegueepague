@@ -61,6 +61,30 @@
       color: white;
     }
 
+    .login-form {
+      max-width: 400px;
+      margin: 0 auto;
+      background: #f8f9fa;
+      padding: 30px;
+      border-radius: 12px;
+    }
+
+    .login-form h3 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .error-message {
+      background: #dc3545;
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+      display: none;
+    }
+
     .view {
       display: none;
       background: white;
@@ -342,8 +366,33 @@
     </div>
   </div>
 
+  <!-- VIEW LOGIN -->
+  <div id="viewLogin" class="view">
+    <div class="login-form">
+      <h3>🔐 Acesso Administrativo</h3>
+      <div class="error-message" id="loginError">Usuário ou senha incorretos!</div>
+      <div class="form-group">
+        <label>Usuário</label>
+        <input type="text" id="loginUsuario" placeholder="Digite o usuário" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="loginSenha" placeholder="Digite a senha">
+      </div>
+      <button class="btn btn-success" onclick="fazerLogin()" style="width: 100%; padding: 12px;">
+        🚪 Entrar
+      </button>
+      <button class="btn btn-secondary" onclick="voltarParaCliente()" style="width: 100%; margin-top: 10px; padding: 12px;">
+        ⬅️ Voltar
+      </button>
+    </div>
+  </div>
+
   <!-- VIEW ADMIN -->
   <div id="viewAdmin" class="view">
+    <div style="text-align: right; margin-bottom: 15px;">
+      <button class="btn btn-secondary" onclick="logout()">🚪 Sair</button>
+    </div>
     <h2>⚙️ Gerenciar Produtos</h2>
     
     <div class="admin-form">
