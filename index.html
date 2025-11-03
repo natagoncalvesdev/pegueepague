@@ -1302,22 +1302,48 @@ function renderHistoricoCompras() {
     return;
   }
   compras.forEach(c => {
-    const totalItens = c.itens.reduce((acc, it) => acc + it.quantidade, 0);
+    const dataCompra = new Date(c.criadoEm);
+    const horaMinuto = dataCompra.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const dataFormatada = dataCompra.toLocaleDateString('pt-BR');
+
     const div = document.createElement('div');
     div.className = 'produto';
-    div.style.marginBottom = '10px';
-    const itensHtml = c.itens.map(it => `${it.nome} <span class="badge">x${it.quantidade}</span> - R$ ${(it.preco * it.quantidade).toFixed(2)}`).join('<br>');
-    div.innerHTML = `
-      <div class="produto-info">
-        <div class="produto-nome">${new Date(c.criadoEm).toLocaleString()} — R$ ${c.total.toFixed(2)} <span class="badge-success">${totalItens} itens</span></div>
-        <div class="produto-detalhes" style="margin-top:6px;">${itensHtml}</div>
+    div.style.cssText = 'flex-direction: column; align-items: stretch; margin-bottom: 10px; padding: 10px 20px;';
+
+    const itensHtml = c.itens.map(it => `
+      <div class="cart-item" style="padding: 5px 0; background: transparent;">
+        <span>${it.nome} <span class="badge">x${it.quantidade}</span></span>
+        <span>R$ ${(it.preco * it.quantidade).toFixed(2)}</span>
       </div>
-      <div class="produto-actions">
-        <button class="btn btn-secondary" onclick="copiarPixRegistro(${c.id})">📋 PIX</button>
+    `).join('');
+
+    div.innerHTML = `
+      <div onclick="toggleHistoricoDetalhes(${c.id})" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; width: 100%;">
+        <div>
+          <span style="font-weight: bold; font-size: 1.1em;">${horaMinuto}</span>
+          <span style="color: #666; margin-left: 10px;">${dataFormatada}</span>
+        </div>
+        <div style="font-weight: bold; font-size: 1.2em; color: #28a745;">
+          R$ ${c.total.toFixed(2)}
+        </div>
+      </div>
+      <div id="historico-detalhes-${c.id}" style="display: none; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+        <h4 style="margin-bottom: 10px;">Itens da Compra:</h4>
+        ${itensHtml}
+        <div style="margin-top: 15px; text-align: right;">
+          <button class="btn btn-secondary" onclick="copiarPixRegistro(${c.id})">📋 Copiar Código PIX</button>
+        </div>
       </div>
     `;
     list.appendChild(div);
   });
+}
+
+function toggleHistoricoDetalhes(id) {
+  const detalhes = document.getElementById(`historico-detalhes-${id}`);
+  if (detalhes) {
+    detalhes.style.display = detalhes.style.display === 'none' ? 'block' : 'none';
+  }
 }
 
 function copiarPixRegistro(id) {
