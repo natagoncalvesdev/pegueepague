@@ -924,8 +924,12 @@ function renderProdutos() {
   }
 
   // Separar produtos com estoque e sem estoque
-  const produtosComEstoque = estoque.filter(p => p.quantidade > 0);
-  const produtosSemEstoque = estoque.filter(p => p.quantidade <= 0);
+  const produtosComEstoque = estoque
+    .filter(p => p.quantidade > 0)
+    .sort((a, b) => a.nome.localeCompare(b.nome));
+  const produtosSemEstoque = estoque
+    .filter(p => p.quantidade <= 0)
+    .sort((a, b) => a.nome.localeCompare(b.nome));
 
   // Renderizar produtos COM estoque primeiro
   produtosComEstoque.forEach(produto => {
@@ -987,7 +991,9 @@ function renderAdminProdutos() {
     return;
   }
 
-  estoque.forEach(produto => {
+  const estoqueOrdenado = [...estoque].sort((a, b) => a.nome.localeCompare(b.nome));
+
+  estoqueOrdenado.forEach(produto => {
     const div = document.createElement('div');
     div.className = 'produto';
     div.innerHTML = `
