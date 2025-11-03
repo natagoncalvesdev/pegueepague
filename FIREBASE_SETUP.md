@@ -30,6 +30,14 @@
     "estoque": {
       ".read": true,
       ".write": true
+    },
+    "sugestoes": {
+      ".read": true,
+      ".write": true
+    },
+    "compras": {
+      ".read": true,
+      ".write": true
     }
   }
 }
@@ -111,4 +119,3 @@ Isso é mais que suficiente para o seu sistema!
 
 - Documentação Firebase: https://firebase.google.com/docs/database/web/start
 - Suporte: https://firebase.google.com/support
-

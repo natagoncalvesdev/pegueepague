@@ -40,6 +40,14 @@
     "estoque": {
       ".read": true,
       ".write": true
+    },
+    "sugestoes": {
+      ".read": true,
+      ".write": true
+    },
+    "compras": {
+      ".read": true,
+      ".write": true
     }
   }
 }
@@ -175,4 +183,3 @@ Se tiver dúvidas em algum passo, me avise qual PASSO está travado!
 ---
 
 **🚀 Após configurar, seu sistema estará na nuvem e acessível de qualquer lugar!**
-

@@ -502,54 +502,64 @@
 
   <!-- VIEW ADMIN -->
   <div id="viewAdmin" class="view">
-    <div style="text-align: right; margin-bottom: 15px;">
-      <button class="btn btn-secondary notif-btn" onclick="toggleSugestoes()" style="margin-right:10px;">
-        💬 Sugestões <span id="sugestoesBadge" class="notif-count">0</span>
-      </button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2>⚙️ Painel Administrativo</h2>
       <button class="btn btn-secondary" onclick="logout()">🚪 Sair</button>
     </div>
-    <h2>⚙️ Gerenciar Produtos</h2>
-    
-    <!-- LISTA DE SUGESTÕES - ADMIN -->
-    <div id="sugestoesContainer" class="admin-form" style="display:none;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h3>💬 Sugestões</h3>
-        <div>
-          <button class="btn btn-warning" onclick="marcarTodasComoLidas()">✔️ Marcar todas como lidas</button>
-          <button class="btn btn-danger" onclick="apagarSugestoesLidas()" style="margin-left:8px;">🗑️ Apagar lidas</button>
+
+    <!-- Navegação da Área Admin -->
+    <div class="view-toggle" id="adminNav" style="margin-bottom: 20px;">
+      <button class="btn-toggle active" onclick="showAdminSection('produtos')">📦 Produtos</button>
+      <button class="btn-toggle notif-btn" onclick="showAdminSection('sugestoes')">
+        💬 Sugestões <span id="sugestoesBadge" class="notif-count">0</span>
+      </button>
+      <button class="btn-toggle" onclick="showAdminSection('historico')">🧾 Histórico</button>
+    </div>
+
+    <!-- Seção de Produtos -->
+    <div id="adminSectionProdutos" class="admin-section active">
+      <div class="admin-form">
+        <h3>➕ Adicionar Novo Produto</h3>
+        <div class="form-group">
+          <label>Nome do Produto</label>
+          <input type="text" id="produtoNome" placeholder="Ex: Coca-Cola 350ml">
         </div>
+        <div class="form-group">
+          <label>Preço (R$)</label>
+          <input type="number" id="produtoPreco" step="0.01" placeholder="Ex: 5.50" min="0">
+        </div>
+        <div class="form-group">
+          <label>Quantidade em Estoque</label>
+          <input type="number" id="produtoQuantidade" placeholder="Ex: 50" min="0">
+        </div>
+        <button class="btn btn-success" onclick="adicionarProduto()">➕ Adicionar Produto</button>
       </div>
-      <div id="sugestoesList"></div>
+      <div>
+        <h3>📦 Lista de Produtos</h3>
+        <div id="adminProdutosList"></div>
+      </div>
     </div>
 
-    <!-- HISTÓRICO DE COMPRAS - ADMIN -->
-    <div class="admin-form">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+    <!-- Seção de Sugestões -->
+    <div id="adminSectionSugestoes" class="admin-section" style="display: none;">
+      <div class="admin-form">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h3>💬 Sugestões Recebidas</h3>
+          <div>
+            <button class="btn btn-warning" onclick="marcarTodasComoLidas()">✔️ Marcar todas como lidas</button>
+            <button class="btn btn-danger" onclick="apagarSugestoesLidas()" style="margin-left:8px;">🗑️ Apagar lidas</button>
+          </div>
+        </div>
+        <div id="sugestoesList"></div>
+      </div>
+    </div>
+
+    <!-- Seção de Histórico -->
+    <div id="adminSectionHistorico" class="admin-section" style="display: none;">
+      <div class="admin-form">
         <h3>🧾 Histórico de Compras</h3>
+        <div id="historicoList"></div>
       </div>
-      <div id="historicoList"></div>
-    </div>
-
-    <div class="admin-form">
-      <h3>➕ Adicionar Novo Produto</h3>
-      <div class="form-group">
-        <label>Nome do Produto</label>
-        <input type="text" id="produtoNome" placeholder="Ex: Coca-Cola 350ml">
-      </div>
-      <div class="form-group">
-        <label>Preço (R$)</label>
-        <input type="number" id="produtoPreco" step="0.01" placeholder="Ex: 5.50" min="0">
-      </div>
-      <div class="form-group">
-        <label>Quantidade em Estoque</label>
-        <input type="number" id="produtoQuantidade" placeholder="Ex: 50" min="0">
-      </div>
-      <button class="btn btn-success" onclick="adicionarProduto()">➕ Adicionar Produto</button>
-    </div>
-
-    <div>
-      <h3>📦 Lista de Produtos</h3>
-      <div id="adminProdutosList"></div>
     </div>
   </div>
 </div>
@@ -652,17 +662,6 @@ function atualizarBadgeSugestoes() {
     badge.style.display = 'inline-block';
   } else {
     badge.style.display = 'none';
-  }
-}
-
-// Alterna exibição das sugestões no admin
-function toggleSugestoes() {
-  const cont = document.getElementById('sugestoesContainer');
-  if (!cont) return;
-  const visivel = cont.style.display !== 'none';
-  cont.style.display = visivel ? 'none' : 'block';
-  if (!visivel) {
-    renderSugestoesAdmin();
   }
 }
 
@@ -814,7 +813,6 @@ function showView(view) {
     document.getElementById('viewAdmin').classList.add('active');
     document.querySelectorAll('.btn-toggle')[1].classList.add('active');
     renderAdminProdutos();
-    renderHistoricoCompras();
   }
 }
 
@@ -825,8 +823,6 @@ function mostrarLogin() {
     document.getElementById('viewAdmin').classList.add('active');
     document.querySelectorAll('.btn-toggle')[1].classList.add('active');
     renderAdminProdutos();
-    atualizarBadgeSugestoes();
-    renderHistoricoCompras();
     return;
   }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -848,7 +844,7 @@ function fazerLogin() {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('viewAdmin').classList.add('active');
     document.querySelectorAll('.btn-toggle')[1].classList.add('active');
-    renderAdminProdutos();
+    showAdminSection('produtos'); // Mostra a seção de produtos por padrão
     atualizarBadgeSugestoes();
     isAdminLogged = true;
     try { localStorage.setItem('isAdminLogged', '1'); } catch(e) {}
@@ -870,6 +866,24 @@ function logout() {
   try { localStorage.removeItem('isAdminLogged'); } catch(e) {}
   mostrarLogin();
 }
+
+// Mostrar seção específica da área admin
+function showAdminSection(sectionName) {
+  // Esconde todas as seções
+  document.querySelectorAll('.admin-section').forEach(sec => sec.style.display = 'none');
+  // Remove a classe 'active' de todos os botões de navegação admin
+  document.querySelectorAll('#adminNav .btn-toggle').forEach(btn => btn.classList.remove('active'));
+
+  // Mostra a seção correta e ativa o botão
+  document.getElementById(`adminSection${capitalize(sectionName)}`).style.display = 'block';
+  document.querySelector(`#adminNav .btn-toggle[onclick="showAdminSection('${sectionName}')"]`).classList.add('active');
+
+  // Renderiza o conteúdo da seção ao ser exibida
+  if (sectionName === 'produtos') renderAdminProdutos();
+  if (sectionName === 'sugestoes') renderSugestoesAdmin();
+  if (sectionName === 'historico') renderHistoricoCompras();
+}
+const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
 
 // Renderizar produtos na view cliente
 function renderProdutos() {
@@ -1180,7 +1194,6 @@ function gerarPix() {
   setTimeout(() => {
     carrinho = [];
     atualizarCarrinho();
-    alert('Compra finalizada! Estoque atualizado.');
   }, 1000);
 }
 
@@ -1276,7 +1289,6 @@ function adicionarCompraRegistro(nova) {
     const novaLista = [nova, ...lista];
     localStorage.setItem('compras', JSON.stringify(novaLista));
     compras = novaLista;
-    renderHistoricoCompras();
   }
 }
 
