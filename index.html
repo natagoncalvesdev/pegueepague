@@ -522,6 +522,14 @@
       <div id="sugestoesList"></div>
     </div>
 
+    <!-- HISTÓRICO DE COMPRAS - ADMIN -->
+    <div class="admin-form">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3>🧾 Histórico de Compras</h3>
+      </div>
+      <div id="historicoList"></div>
+    </div>
+
     <div class="admin-form">
       <h3>➕ Adicionar Novo Produto</h3>
       <div class="form-group">
@@ -576,6 +584,9 @@ let nextId = 4;
 
 // Sistema de Sugestões
 let sugestoes = [];
+
+// Sistema de Compras (Histórico)
+let compras = [];
 
 // Salvar estoque (Firebase ou localStorage)
 function salvarEstoque() {
@@ -803,6 +814,7 @@ function showView(view) {
     document.getElementById('viewAdmin').classList.add('active');
     document.querySelectorAll('.btn-toggle')[1].classList.add('active');
     renderAdminProdutos();
+    renderHistoricoCompras();
   }
 }
 
@@ -814,6 +826,7 @@ function mostrarLogin() {
     document.querySelectorAll('.btn-toggle')[1].classList.add('active');
     renderAdminProdutos();
     atualizarBadgeSugestoes();
+    renderHistoricoCompras();
     return;
   }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -1106,6 +1119,9 @@ function gerarPix() {
 
   const total = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
 
+  // Snapshot dos itens do carrinho antes de modificações
+  const itensCompra = carrinho.map(item => ({ id: item.id, nome: item.nome, preco: item.preco, quantidade: item.quantidade }));
+
   // DADOS PIX
   const chave = "09518875995";
   const nome = "Pegue e Pague";
@@ -1150,6 +1166,16 @@ function gerarPix() {
   // SCROLL SUAVE ATÉ O QR CODE
   document.getElementById('pixArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
   
+  // REGISTRAR COMPRA NO HISTÓRICO
+  const registro = {
+    id: Date.now(),
+    itens: itensCompra,
+    total: parseFloat(valor),
+    criadoEm: new Date().toISOString(),
+    payloadPix: pixPayload
+  };
+  adicionarCompraRegistro(registro);
+
   // LIMPAR CARRINHO APÓS GERAR PIX
   setTimeout(() => {
     carrinho = [];
@@ -1210,9 +1236,93 @@ function gerarCRC16(str) {
   return resultado.toString(16).toUpperCase().padStart(4, "0");
 }
 
+// Salvar compras (Firebase ou localStorage)
+function salvarCompras() {
+  if (db) {
+    db.ref('compras').set(compras);
+  } else {
+    localStorage.setItem('compras', JSON.stringify(compras));
+  }
+}
+
+// Carregar compras (Firebase ou localStorage)
+async function carregarCompras() {
+  if (db) {
+    const snapshot = await db.ref('compras').once('value');
+    compras = snapshot.val() || [];
+  } else {
+    compras = JSON.parse(localStorage.getItem('compras')) || [];
+  }
+  renderHistoricoCompras();
+}
+
+// Adicionar registro de compra de forma atômica
+function adicionarCompraRegistro(nova) {
+  if (db) {
+    firebase.database().ref('compras').transaction(curr => {
+      const listaAtual = Array.isArray(curr) ? curr : [];
+      return [nova, ...listaAtual];
+    }).then(() => {
+      carregarCompras();
+    }).catch(() => {
+      db.ref('compras').once('value').then(snap => {
+        const lista = Array.isArray(snap.val()) ? snap.val() : [];
+        const novaLista = [nova, ...lista];
+        return db.ref('compras').set(novaLista);
+      }).then(() => carregarCompras());
+    });
+  } else {
+    const lista = JSON.parse(localStorage.getItem('compras')) || [];
+    const novaLista = [nova, ...lista];
+    localStorage.setItem('compras', JSON.stringify(novaLista));
+    compras = novaLista;
+    renderHistoricoCompras();
+  }
+}
+
+// Renderiza histórico de compras no admin
+function renderHistoricoCompras() {
+  const list = document.getElementById('historicoList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (compras.length === 0) {
+    list.innerHTML = '<p style="text-align:center; padding:10px;">Nenhuma compra registrada ainda.</p>';
+    return;
+  }
+  compras.forEach(c => {
+    const totalItens = c.itens.reduce((acc, it) => acc + it.quantidade, 0);
+    const div = document.createElement('div');
+    div.className = 'produto';
+    div.style.marginBottom = '10px';
+    const itensHtml = c.itens.map(it => `${it.nome} <span class="badge">x${it.quantidade}</span> - R$ ${(it.preco * it.quantidade).toFixed(2)}`).join('<br>');
+    div.innerHTML = `
+      <div class="produto-info">
+        <div class="produto-nome">${new Date(c.criadoEm).toLocaleString()} — R$ ${c.total.toFixed(2)} <span class="badge-success">${totalItens} itens</span></div>
+        <div class="produto-detalhes" style="margin-top:6px;">${itensHtml}</div>
+      </div>
+      <div class="produto-actions">
+        <button class="btn btn-secondary" onclick="copiarPixRegistro(${c.id})">📋 PIX</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function copiarPixRegistro(id) {
+  const reg = compras.find(x => x.id === id);
+  if (!reg) return;
+  const txt = reg.payloadPix || '';
+  navigator.clipboard.writeText(txt).then(() => {
+    alert('Payload PIX copiado!');
+  }).catch(() => {
+    alert('Erro ao copiar.');
+  });
+}
+
 // Inicializar
 carregarEstoque();
 carregarSugestoes();
+carregarCompras();
 try { isAdminLogged = localStorage.getItem('isAdminLogged') === '1'; } catch(e) { isAdminLogged = false; }
 </script>
 
