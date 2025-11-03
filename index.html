@@ -416,6 +416,34 @@
       .action-buttons .btn {
         margin-left: 0 !important;
       }
+
+      /* Otimizações da Área Admin para Mobile */
+      #viewAdmin .produto {
+        align-items: stretch; /* Alinha itens para preencher a largura */
+      }
+      #viewAdmin .produto-info {
+        margin-bottom: 15px; /* Espaço entre info e ações */
+      }
+      #viewAdmin .produto-actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+      }
+      #viewAdmin .produto-actions .quantidade-input {
+        width: 100%;
+      }
+      #viewAdmin .produto-actions .btn {
+        width: 100%;
+      }
+      .admin-header-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .admin-header-actions .btn {
+        margin-left: 0 !important;
+      }
     }
   </style>
 </head>
@@ -545,7 +573,7 @@
       <div class="admin-form">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
           <h3>💬 Sugestões Recebidas</h3>
-          <div>
+          <div class="admin-header-actions">
             <button class="btn btn-warning" onclick="marcarTodasComoLidas()">✔️ Marcar todas como lidas</button>
             <button class="btn btn-danger" onclick="apagarSugestoesLidas()" style="margin-left:8px;">🗑️ Apagar lidas</button>
           </div>
