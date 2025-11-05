@@ -462,6 +462,9 @@
 
   <!-- VIEW CLIENTE -->
   <div id="viewCliente" class="view active">
+    <div class="form-group" style="margin-bottom: 20px;">
+      <input type="text" id="buscaCliente" onkeyup="renderProdutos()" placeholder="🔎 Buscar produto..." autocomplete="off">
+    </div>
     <div id="produtosList"></div>
     
     <div class="total-container">
@@ -563,7 +566,10 @@
         <button class="btn btn-success" onclick="adicionarProduto()">➕ Adicionar Produto</button>
       </div>
       <div>
-        <h3>📦 Lista de Produtos</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h3>📦 Lista de Produtos</h3>
+          <input type="text" id="buscaAdmin" onkeyup="renderAdminProdutos()" placeholder="🔎 Buscar..." style="padding: 8px; border-radius: 8px; border: 2px solid #ddd; width: 40%;">
+        </div>
         <div id="adminProdutosList"></div>
       </div>
     </div>
@@ -916,19 +922,31 @@ const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
 // Renderizar produtos na view cliente
 function renderProdutos() {
   const container = document.getElementById('produtosList');
+  const termoBusca = document.getElementById('buscaCliente')?.value.toLowerCase().trim() || '';
   container.innerHTML = '';
 
-  if (estoque.length === 0) {
+  const palavrasBusca = termoBusca.split(' ').filter(Boolean); // Separa o termo em palavras
+
+  const estoqueFiltrado = estoque.filter(p => {
+    const nomeProduto = p.nome.toLowerCase();
+    // Verifica se TODAS as palavras da busca estão contidas no nome do produto
+    return palavrasBusca.every(palavra => nomeProduto.includes(palavra));
+  });
+
+  if (estoque.length === 0) { // Mensagem se o estoque original está vazio
     container.innerHTML = '<p style="text-align:center; padding:20px;">Nenhum produto disponível no momento.</p>';
     return;
   }
 
+  if (estoqueFiltrado.length === 0) { // Mensagem se a busca não retorna resultados
+    container.innerHTML = `<p style="text-align:center; padding:20px;">Nenhum produto encontrado para "<strong>${termoBusca}</strong>".</p>`;
+    return;
+  }
+
   // Separar produtos com estoque e sem estoque
-  const produtosComEstoque = estoque
-    .filter(p => p.quantidade > 0)
+  const produtosComEstoque = estoqueFiltrado.filter(p => p.quantidade > 0)
     .sort((a, b) => a.nome.localeCompare(b.nome));
-  const produtosSemEstoque = estoque
-    .filter(p => p.quantidade <= 0)
+  const produtosSemEstoque = estoqueFiltrado.filter(p => p.quantidade <= 0)
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
   // Renderizar produtos COM estoque primeiro
@@ -984,6 +1002,7 @@ function renderProdutos() {
 // Renderizar produtos na view admin
 function renderAdminProdutos() {
   const container = document.getElementById('adminProdutosList');
+  const termoBusca = document.getElementById('buscaAdmin')?.value.toLowerCase().trim() || '';
   container.innerHTML = '';
 
   if (estoque.length === 0) {
@@ -991,8 +1010,18 @@ function renderAdminProdutos() {
     return;
   }
 
-  const estoqueOrdenado = [...estoque].sort((a, b) => a.nome.localeCompare(b.nome));
+  const palavrasBusca = termoBusca.split(' ').filter(Boolean); // Separa o termo em palavras
 
+  const estoqueFiltrado = estoque.filter(p => {
+    const nomeProduto = p.nome.toLowerCase();
+    return palavrasBusca.every(palavra => nomeProduto.includes(palavra));
+  });
+  
+  if (estoqueFiltrado.length === 0) {
+    container.innerHTML = `<p style="text-align:center; padding:20px;">Nenhum produto encontrado para "<strong>${termoBusca}</strong>".</p>`;
+    return;
+  }
+  const estoqueOrdenado = [...estoqueFiltrado].sort((a, b) => a.nome.localeCompare(b.nome));
   estoqueOrdenado.forEach(produto => {
     const div = document.createElement('div');
     div.className = 'produto';
