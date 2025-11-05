@@ -455,6 +455,11 @@
     <p>Sistema de Estoque Inteligente</p>
   </div>
 
+  <div class="view-toggle">
+    <button class="btn-toggle active" onclick="showView('cliente')">👤 Área do Cliente</button>
+    <button class="btn-toggle" onclick="mostrarLogin()">⚙️ Administração</button>
+  </div>
+
   <!-- VIEW CLIENTE -->
   <div id="viewCliente" class="view active">
     <div class="form-group" style="margin-bottom: 20px;">
@@ -520,7 +525,7 @@
       <button class="btn btn-success" onclick="fazerLogin()" style="width: 100%; padding: 12px;">
         🚪 Entrar
       </button>
-      <button class="btn btn-secondary" onclick="voltarParaCliente()" style="width: 100%; margin-top: 10px; padding: 12px;" title="Voltar para a área do cliente">
+      <button class="btn btn-secondary" onclick="voltarParaCliente()" style="width: 100%; margin-top: 10px; padding: 12px;">
         ⬅️ Voltar
       </button>
     </div>
@@ -822,18 +827,23 @@ async function carregarEstoque() {
     } else {
       nextId = Math.max(...estoque.map(p => p.id)) + 1;
     }
+    
+    renderProdutos();
   }
 }
 
 // Navegação de views
 function showView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
   
   if (view === 'cliente') {
     document.getElementById('viewCliente').classList.add('active');
+    document.querySelectorAll('.btn-toggle')[0].classList.add('active');
     renderProdutos();
   } else if (view === 'admin') {
     document.getElementById('viewAdmin').classList.add('active');
+    document.querySelectorAll('.btn-toggle')[1].classList.add('active');
     renderAdminProdutos();
   }
 }
@@ -842,12 +852,13 @@ function showView(view) {
 function mostrarLogin() {
   if (isAdminLogged) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('header').style.display = 'none';
     document.getElementById('viewAdmin').classList.add('active');
+    document.querySelectorAll('.btn-toggle')[1].classList.add('active');
     renderAdminProdutos();
     return;
   }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
   document.getElementById('viewLogin').classList.add('active');
   document.getElementById('loginError').style.display = 'none';
   document.getElementById('loginUsuario').value = '';
@@ -863,8 +874,8 @@ function fazerLogin() {
   if (usuario === 'supervisor' && senha === 'senhadosupervisor') {
     // Login bem-sucedido, mostrar área admin
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('header').style.display = 'none';
     document.getElementById('viewAdmin').classList.add('active');
+    document.querySelectorAll('.btn-toggle')[1].classList.add('active');
     showAdminSection('produtos'); // Mostra a seção de produtos por padrão
     atualizarBadgeSugestoes();
     isAdminLogged = true;
@@ -878,15 +889,13 @@ function fazerLogin() {
 
 // Voltar para área do cliente
 function voltarParaCliente() {
-  // Redireciona para a URL principal (sem o #adm)
-  window.location.href = window.location.pathname;
+  showView('cliente');
 }
 
 // Logout
 function logout() {
   isAdminLogged = false;
   try { localStorage.removeItem('isAdminLogged'); } catch(e) {}
-  document.getElementById('header').style.display = 'block';
   mostrarLogin();
 }
 
@@ -895,11 +904,11 @@ function showAdminSection(sectionName) {
   // Esconde todas as seções
   document.querySelectorAll('.admin-section').forEach(sec => sec.style.display = 'none');
   // Remove a classe 'active' de todos os botões de navegação admin
-  document.querySelectorAll('#adminNav button').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('#adminNav .btn-toggle').forEach(btn => btn.classList.remove('active'));
 
   // Mostra a seção correta e ativa o botão
   document.getElementById(`adminSection${capitalize(sectionName)}`).style.display = 'block';
-  document.querySelector(`#adminNav button[onclick="showAdminSection('${sectionName}')"]`).classList.add('active');
+  document.querySelector(`#adminNav .btn-toggle[onclick="showAdminSection('${sectionName}')"]`).classList.add('active');
 
   // Renderiza o conteúdo da seção ao ser exibida
   if (sectionName === 'produtos') renderAdminProdutos();
@@ -1318,6 +1327,7 @@ async function carregarCompras() {
   } else {
     compras = JSON.parse(localStorage.getItem('compras')) || [];
   }
+  renderHistoricoCompras();
 }
 
 // Adicionar registro de compra de forma atômica
@@ -1408,30 +1418,12 @@ function copiarPixRegistro(id) {
   });
 }
 
-// Roteamento inicial baseado na URL
-function handleRouting() {
-  const hash = window.location.hash;
-  if (hash === '#adm') {
-    document.getElementById('header').style.display = 'none';
-    mostrarLogin();
-  } else {
-    document.getElementById('header').style.display = 'block';
-    document.getElementById('viewCliente').classList.add('active');
-    renderProdutos(); // Renderiza os produtos na carga inicial da view do cliente
-  }
-}
-
-// Inicializar a aplicação
-async function inicializarApp() {
-  // Carrega todos os dados em paralelo
-  await Promise.all([carregarEstoque(), carregarSugestoes(), carregarCompras()]);
-  
-  try { isAdminLogged = localStorage.getItem('isAdminLogged') === '1'; } catch(e) { isAdminLogged = false; }
-  
-  handleRouting(); // Executa o roteamento APÓS tudo estar carregado
-}
-
-inicializarApp();
+// Inicializar
+carregarEstoque();
+carregarSugestoes();
+carregarCompras();
+try { isAdminLogged = localStorage.getItem('isAdminLogged') === '1'; } catch(e) { isAdminLogged = false; }
+showView('cliente');
 </script>
 
 </body>
