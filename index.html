@@ -808,8 +808,6 @@ async function carregarEstoque() {
       ];
       salvarEstoque();
     }
-    
-    renderProdutos();
   } else {
     // Fallback para localStorage
     estoque = JSON.parse(localStorage.getItem('estoque')) || [
@@ -824,8 +822,6 @@ async function carregarEstoque() {
     } else {
       nextId = Math.max(...estoque.map(p => p.id)) + 1;
     }
-    
-    renderProdutos();
   }
 }
 
@@ -1322,7 +1318,6 @@ async function carregarCompras() {
   } else {
     compras = JSON.parse(localStorage.getItem('compras')) || [];
   }
-  renderHistoricoCompras();
 }
 
 // Adicionar registro de compra de forma atômica
