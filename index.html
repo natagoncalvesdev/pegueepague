@@ -1425,13 +1425,17 @@ function handleRouting() {
   }
 }
 
-// Inicializar
-carregarEstoque();
-carregarSugestoes();
-carregarCompras();
-try { isAdminLogged = localStorage.getItem('isAdminLogged') === '1'; } catch(e) { isAdminLogged = false; }
+// Inicializar a aplicação
+async function inicializarApp() {
+  // Carrega todos os dados em paralelo
+  await Promise.all([carregarEstoque(), carregarSugestoes(), carregarCompras()]);
+  
+  try { isAdminLogged = localStorage.getItem('isAdminLogged') === '1'; } catch(e) { isAdminLogged = false; }
+  
+  handleRouting(); // Executa o roteamento APÓS tudo estar carregado
+}
 
-handleRouting(); // Executa o roteamento quando a página carrega
+inicializarApp();
 </script>
 
 </body>
