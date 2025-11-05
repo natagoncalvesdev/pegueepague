@@ -26,6 +26,7 @@
     .container {
       max-width: 800px;
       margin: 0 auto;
+      position: relative; /* Necessário para o menu */
     }
 
     .header {
@@ -39,30 +40,6 @@
       font-size: 2.5em;
       margin-bottom: 10px;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .view-toggle {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .btn-toggle {
-      background: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-      transition: all 0.3s;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    .btn-toggle.active {
-      background: #28a745;
-      color: white;
     }
 
     .login-form {
@@ -452,6 +429,51 @@
       .admin-header-actions .btn {
         margin-left: 0 !important;
       }
+
+      .menu-container {
+        top: 20px;
+        right: 10px;
+      }
+    }
+
+    /* Estilos para o novo menu dropdown */
+    .menu-container {
+      position: absolute;
+      top: 30px;
+      right: 0;
+      z-index: 100;
+    }
+    .menu-icon {
+      cursor: pointer;
+      padding: 10px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .menu-icon svg {
+      fill: white;
+    }
+    .menu-dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 50px;
+      background-color: white;
+      min-width: 200px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .menu-dropdown a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      cursor: pointer;
+    }
+    .menu-dropdown a:hover { background-color: #f1f1f1; }
     }
   </style>
 </head>
@@ -463,9 +485,15 @@
     <p>Sistema de Estoque Inteligente</p>
   </div>
 
-  <div class="view-toggle">
-    <button class="btn-toggle active" onclick="showView('cliente')">👤 Área do Cliente</button>
-    <button class="btn-toggle" onclick="mostrarLogin()">⚙️ Administração</button>
+  <!-- Novo Menu Dropdown -->
+  <div class="menu-container">
+    <div class="menu-icon" onclick="toggleMenu()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+    </div>
+    <div id="menuDropdown" class="menu-dropdown">
+      <a onclick="showView('cliente'); toggleMenu();">👤 Área do Cliente</a>
+      <a onclick="mostrarLogin(); toggleMenu();">⚙️ Administração</a>
+    </div>
   </div>
 
   <!-- VIEW CLIENTE -->
@@ -841,15 +869,12 @@ async function carregarEstoque() {
 // Navegação de views
 function showView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
   
   if (view === 'cliente') {
     document.getElementById('viewCliente').classList.add('active');
-    document.querySelectorAll('.btn-toggle')[0].classList.add('active');
     renderProdutos();
   } else if (view === 'admin') {
     document.getElementById('viewAdmin').classList.add('active');
-    document.querySelectorAll('.btn-toggle')[1].classList.add('active');
     renderAdminProdutos();
   }
 }
@@ -859,12 +884,10 @@ function mostrarLogin() {
   if (isAdminLogged) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('viewAdmin').classList.add('active');
-    document.querySelectorAll('.btn-toggle')[1].classList.add('active');
     renderAdminProdutos();
     return;
   }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
   document.getElementById('viewLogin').classList.add('active');
   document.getElementById('loginError').style.display = 'none';
   document.getElementById('loginUsuario').value = '';
@@ -881,7 +904,6 @@ function fazerLogin() {
     // Login bem-sucedido, mostrar área admin
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('viewAdmin').classList.add('active');
-    document.querySelectorAll('.btn-toggle')[1].classList.add('active');
     showAdminSection('produtos'); // Mostra a seção de produtos por padrão
     atualizarBadgeSugestoes();
     isAdminLogged = true;
@@ -910,11 +932,11 @@ function showAdminSection(sectionName) {
   // Esconde todas as seções
   document.querySelectorAll('.admin-section').forEach(sec => sec.style.display = 'none');
   // Remove a classe 'active' de todos os botões de navegação admin
-  document.querySelectorAll('#adminNav .btn-toggle').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('#adminNav button').forEach(btn => btn.classList.remove('active'));
 
   // Mostra a seção correta e ativa o botão
   document.getElementById(`adminSection${capitalize(sectionName)}`).style.display = 'block';
-  document.querySelector(`#adminNav .btn-toggle[onclick="showAdminSection('${sectionName}')"]`).classList.add('active');
+  document.querySelector(`#adminNav button[onclick="showAdminSection('${sectionName}')"]`).classList.add('active');
 
   // Renderiza o conteúdo da seção ao ser exibida
   if (sectionName === 'produtos') renderAdminProdutos();
@@ -1422,6 +1444,22 @@ function copiarPixRegistro(id) {
   }).catch(() => {
     alert('Erro ao copiar.');
   });
+}
+
+// Controle do novo menu dropdown
+function toggleMenu() {
+  document.getElementById("menuDropdown").style.display = 
+    document.getElementById("menuDropdown").style.display === 'block' ? 'none' : 'block';
+}
+
+// Fecha o menu se clicar fora dele
+window.onclick = function(event) {
+  if (!event.target.closest('.menu-container')) {
+    const dropdown = document.getElementById("menuDropdown");
+    if (dropdown.style.display === 'block') {
+      dropdown.style.display = 'none';
+    }
+  }
 }
 
 // Inicializar a aplicação
