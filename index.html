@@ -1416,7 +1416,8 @@ function handleRouting() {
     mostrarLogin();
   } else {
     document.getElementById('header').style.display = 'block';
-    showView('cliente');
+    document.getElementById('viewCliente').classList.add('active');
+    renderProdutos(); // Renderiza os produtos na carga inicial da view do cliente
   }
 }
 
