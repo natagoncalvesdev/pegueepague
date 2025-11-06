@@ -740,6 +740,8 @@
       align-items: stretch;
       text-align: center;
       padding: 22px; /* leve aumento no padding interno para não ficar colado */
+      height: auto; /* garante altura automática */
+      min-height: 160px; /* evita corte de conteúdo em cartões baixos */
     }
     #adminProdutosList.grid-view .produto-info {
       flex-grow: 1;
@@ -772,6 +774,8 @@
       flex-wrap: wrap;
       gap: 6px;
       margin-top: 6px;
+      justify-content: center;
+      width: 100%;
     }
     .admin-inline-edit .inline-input {
       padding: 6px 8px;
@@ -782,6 +786,10 @@
     }
     .admin-inline-edit .inline-input.preco { width: 90px; }
     .admin-inline-edit .inline-input.quantidade { width: 70px; }
+
+    /* Ajustes específicos quando em grid do admin */
+    #adminProdutosList.grid-view .produto-info { width: 100%; }
+    #adminProdutosList.grid-view .produto-actions { margin-top: 10px; }
 
     @media (max-width: 768px) {
       .admin-inline-edit { justify-content: center; }
