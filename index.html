@@ -1167,6 +1167,7 @@ function mostrarLogin() {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('viewAdmin').classList.add('active');
     renderAdminProdutos();
+    document.body.classList.add('admin-view-active');
     return;
   }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -1174,6 +1175,7 @@ function mostrarLogin() {
   document.getElementById('loginError').style.display = 'none';
   document.getElementById('loginUsuario').value = '';
   document.getElementById('loginSenha').value = '';
+  document.body.classList.remove('admin-view-active');
 }
 
 // Fazer login
@@ -1190,6 +1192,7 @@ function fazerLogin() {
     atualizarBadgeSugestoes();
     isAdminLogged = true;
     try { localStorage.setItem('isAdminLogged', '1'); } catch(e) {}
+    document.body.classList.add('admin-view-active');
   } else {
     // Erro de login
     document.getElementById('loginError').style.display = 'block';
@@ -1207,6 +1210,7 @@ function voltarParaCliente() {
 function logout() {
   isAdminLogged = false;
   try { localStorage.removeItem('isAdminLogged'); } catch(e) {}
+  document.body.classList.remove('admin-view-active');
   mostrarLogin();
 }
 
