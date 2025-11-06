@@ -761,6 +761,8 @@
       justify-content: center;
       flex-wrap: wrap;
     }
+    /* Em lista (linhas), alinhar ações à esquerda */
+    #adminProdutosList.list-view .produto-actions { justify-content: flex-start; }
     .admin-content .admin-edit-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -774,10 +776,12 @@
       flex-wrap: nowrap; /* mantém tudo em uma única linha */
       gap: 6px;
       margin-top: 6px;
-      justify-content: center;
+      justify-content: flex-start; /* por padrão, à esquerda */
       width: 100%;
       white-space: nowrap; /* evita quebra de linha do texto */
     }
+    /* Em grid (blocos), centraliza a linha inline para visual mais equilibrado */
+    #adminProdutosList.grid-view .admin-inline-edit { justify-content: center; }
     .admin-inline-edit .inline-input {
       padding: 4px 6px;
       border: 1px solid #ced4da;
