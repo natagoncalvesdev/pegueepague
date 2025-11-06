@@ -401,6 +401,11 @@
       .action-buttons .btn {
         margin-left: 0 !important;
       }
+      .view-toggle {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+      }
 
       /* Otimizações da Área Admin para Mobile */
       #viewAdmin .produto {
@@ -641,7 +646,7 @@
     <!-- Seção de Sugestões -->
     <div id="adminSectionSugestoes" class="admin-section" style="display: none;">
       <div class="admin-form">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap: wrap; gap: 10px;">
           <h3>💬 Sugestões Recebidas</h3>
           <div class="admin-header-actions">
             <button class="btn btn-warning" onclick="marcarTodasComoLidas()">✔️ Marcar todas como lidas</button>
