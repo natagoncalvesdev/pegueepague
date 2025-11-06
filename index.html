@@ -441,18 +441,31 @@
       .admin-header-actions .btn {
         margin-left: 0 !important;
       }
-      /* Transforma sidebar em header no mobile */
-      .admin-layout { flex-direction: column; }
-      .admin-sidebar { width: 100%; height: auto; border-radius: 12px 12px 0 0; }
-      .admin-nav {
+      /* --- NOVA INTERFACE ADMIN PARA MOBILE --- */
+      .admin-layout {
+        flex-direction: column;
+        background: #f0f2f5; /* Fundo mais suave para a área de conteúdo */
+        border-radius: 0;
+        min-height: 100vh;
+      }
+      .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 60px; /* Altura fixa para o header */
         flex-direction: row;
-        justify-content: space-around;
-        flex-wrap: wrap; /* Permite que os botões quebrem a linha se não couberem */
+        align-items: center;
+        justify-content: center;
+        padding: 0 20px;
+        border-radius: 0;
+        z-index: 100;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
-      .admin-nav .btn-toggle {
-        flex-grow: 1; /* Faz os botões ocuparem o espaço disponível */
-      }
-      .admin-content { margin-left: 0; margin-top: 20px; }
+      .sidebar-header h3 { font-size: 1.2em; }
+      .sidebar-header p, .sidebar-footer { display: none; } /* Esconde itens desnecessários */
+      .admin-content { margin-left: 0; padding: 80px 15px 100px 15px; } /* Padding para não ficar atrás do header/footer */
+      .admin-nav { display: none; } /* Esconde a navegação antiga da sidebar */
 
       /* Estilos para Grid/List view no mobile */
       #produtosList.grid-view {
@@ -467,6 +480,34 @@
         top: 20px;
         right: 10px;
       }
+    }
+
+    /* --- BARRA DE NAVEGAÇÃO INFERIOR (MOBILE ADMIN) --- */
+    .admin-bottom-nav {
+      display: none; /* Escondido por padrão */
+    }
+    @media (max-width: 600px) {
+      .admin-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: white;
+        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        z-index: 100;
+      }
+      .admin-bottom-nav .btn-toggle {
+        flex: 1;
+        flex-direction: column;
+        padding: 8px 5px;
+        font-size: 12px;
+        border-radius: 0;
+        border-top: 3px solid transparent;
+        border-bottom: none;
+        gap: 4px;
+      }
+      .admin-bottom-nav .btn-toggle.active { border-top-color: #28a745; border-bottom-color: transparent; background-color: #f8f9fa;}
     }
 
     /* Estilos para o novo menu dropdown */
@@ -838,6 +879,20 @@
   </div>
 </div>
 
+<!-- NAVEGAÇÃO INFERIOR PARA ADMIN MOBILE -->
+<div class="admin-bottom-nav" id="adminBottomNav">
+  <button class="btn-toggle active" onclick="showAdminSection('produtos')">
+    <span>📦</span>
+    <span>Produtos</span>
+  </button>
+  <button class="btn-toggle notif-btn" onclick="showAdminSection('sugestoes')">
+    <span>💬</span>
+    <span>Sugestões</span>
+  </button>
+  <button class="btn-toggle" onclick="showAdminSection('historico')"><span>🧾</span><span>Histórico</span></button>
+  <button class="btn-toggle" onclick="logout()"><span>🚪</span><span>Sair</span></button>
+</div>
+
 <script>
 // Configuração Firebase
 const firebaseConfig = {
@@ -1142,12 +1197,15 @@ function logout() {
 function showAdminSection(sectionName) {
   // Esconde todas as seções
   document.querySelectorAll('.admin-section').forEach(sec => sec.style.display = 'none');
-  // Remove a classe 'active' de todos os botões de navegação admin
+  // Remove a classe 'active' de todos os botões de navegação (sidebar e bottom nav)
   document.querySelectorAll('#adminNav button').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('#adminBottomNav button').forEach(btn => btn.classList.remove('active'));
 
   // Mostra a seção correta e ativa o botão
   document.getElementById(`adminSection${capitalize(sectionName)}`).style.display = 'block';
   document.querySelector(`#adminNav button[onclick="showAdminSection('${sectionName}')"]`).classList.add('active');
+  const bottomBtn = document.querySelector(`#adminBottomNav button[onclick="showAdminSection('${sectionName}')"]`);
+  if (bottomBtn) bottomBtn.classList.add('active');
 
   // Renderiza o conteúdo da seção ao ser exibida
   if (sectionName === 'produtos') renderAdminProdutos();
