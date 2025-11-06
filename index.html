@@ -476,6 +476,34 @@
     .menu-dropdown a:hover { background-color: #f1f1f1; }
     
   </style>
+  <style>
+    /* Estilos para a navegação da área admin */
+    .view-toggle {
+      display: flex;
+      gap: 10px;
+      border-bottom: 2px solid #e9ecef;
+    }
+    .btn-toggle {
+      background: none;
+      border: none;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      color: #6c757d;
+      position: relative;
+      transition: all 0.2s ease;
+      border-bottom: 3px solid transparent;
+    }
+    .btn-toggle:hover {
+      color: #333;
+      background-color: #f8f9fa;
+    }
+    .btn-toggle.active {
+      color: #28a745;
+      border-bottom-color: #28a745;
+    }
+  </style>
 </head>
 <body>
 
@@ -575,7 +603,7 @@
     </div>
 
     <!-- Navegação da Área Admin -->
-    <div class="view-toggle" id="adminNav" style="margin-bottom: 20px;">
+    <div class="view-toggle" id="adminNav">
       <button class="btn-toggle active" onclick="showAdminSection('produtos')">📦 Produtos</button>
       <button class="btn-toggle notif-btn" onclick="showAdminSection('sugestoes')">
         💬 Sugestões <span id="sugestoesBadge" class="notif-count">0</span>
