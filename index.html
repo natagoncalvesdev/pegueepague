@@ -754,20 +754,39 @@
 
     /* --- Layout de edição de produtos no ADMIN --- */
     .admin-content .produto-actions {
-      display: grid;
-      grid-template-rows: auto auto; /* inputs em cima, botões embaixo */
+      display: flex;
       gap: 10px;
-      align-items: center;
-    }
-    .admin-content .admin-edit-inputs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
     .admin-content .admin-edit-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
+    }
+
+    /* Inputs inline para edição rápida no detalhe do produto */
+    .admin-inline-edit {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .admin-inline-edit .inline-input {
+      padding: 6px 8px;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      background: #fff;
+      text-align: center;
+    }
+    .admin-inline-edit .inline-input.preco { width: 90px; }
+    .admin-inline-edit .inline-input.quantidade { width: 70px; }
+
+    @media (max-width: 768px) {
+      .admin-inline-edit { justify-content: center; }
+      .admin-content .admin-edit-actions { grid-template-columns: 1fr; }
+      .admin-content .admin-edit-actions .btn { width: 100%; }
     }
   </style>
 </head>
@@ -1447,13 +1466,15 @@ function renderAdminProdutos() {
     div.innerHTML = `
       <div class="produto-info">
         <div class="produto-nome">${produto.nome}</div>
-        <div class="produto-detalhes">Preço: R$ ${produto.preco.toFixed(2)} | Estoque: ${produto.quantidade} unidades</div>
+        <div class="produto-detalhes admin-inline-edit">
+          <span>Preço:</span>
+          <input type="number" class="inline-input preco" id="precoEdit_${produto.id}" value="${produto.preco}" step="0.01" min="0">
+          <span style="margin: 0 6px;">|</span>
+          <span>Estoque:</span>
+          <input type="number" class="inline-input quantidade" id="qtdEdit_${produto.id}" value="${produto.quantidade}" min="0">
+        </div>
       </div>
       <div class="produto-actions">
-        <div class="admin-edit-inputs">
-          <input type="number" class="quantidade-input" id="qtdEdit_${produto.id}" value="${produto.quantidade}" min="0">
-          <input type="number" class="quantidade-input" id="precoEdit_${produto.id}" value="${produto.preco}" step="0.01" min="0">
-        </div>
         <div class="admin-edit-actions">
           <button class="btn btn-warning" onclick="salvarEdicao(${produto.id})">💾 Salvar</button>
           <button class="btn btn-danger" onclick="removerProduto(${produto.id})">🗑️ Excluir</button>
