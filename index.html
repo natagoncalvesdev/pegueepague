@@ -464,7 +464,7 @@
       }
       .sidebar-header h3 { font-size: 1.2em; }
       .sidebar-header p, .sidebar-footer { display: none; } /* Esconde itens desnecessários */
-      .admin-content { margin-left: 0; padding: 80px 15px 100px 15px; } /* Padding para não ficar atrás do header/footer */
+      .admin-content { margin-left: 0; padding: 75px 15px 90px 15px; } /* Padding para não ficar atrás do header/footer */
       .admin-nav { display: none; } /* Esconde a navegação antiga da sidebar */
 
       /* Estilos para Grid/List view no mobile */
@@ -474,6 +474,11 @@
       }
       #produtosList.grid-view .produto {
         padding: 15px;
+      }
+
+      /* Grid view para admin no mobile */
+      #adminProdutosList.grid-view {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       }
 
       .menu-container {
@@ -486,8 +491,9 @@
     .admin-bottom-nav {
       display: none; /* Escondido por padrão */
     }
+    /* Mostra a barra inferior apenas na view admin e em telas mobile */
     @media (max-width: 600px) {
-      .admin-bottom-nav {
+      body.admin-view-active .admin-bottom-nav {
         display: flex;
         position: fixed;
         bottom: 0;
@@ -704,6 +710,11 @@
       justify-content: center;
       margin-top: auto; /* Empurra o botão para baixo */
     }
+
+    /* Estilos para a visualização em Grade no Admin */
+    #adminProdutosList.grid-view .produto {
+      flex-direction: column;
+    }
   </style>
 </head>
 <body>
@@ -847,8 +858,15 @@
         </div>
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3>📦 Lista de Produtos</h3>
-            <input type="text" id="buscaAdmin" onkeyup="renderAdminProdutos()" placeholder="🔎 Buscar..." style="padding: 8px; border-radius: 8px; border: 2px solid #ddd; width: 40%;">
+            <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
+              <div class="form-group" style="flex-grow: 1; margin-bottom: 0;">
+                <input type="text" id="buscaAdmin" onkeyup="renderAdminProdutos()" placeholder="🔎 Buscar produto...">
+              </div>
+              <div class="view-mode-selector" style="margin-bottom: 0;">
+                <button id="admin-view-mode-toggle" class="view-mode-btn" onclick="toggleAdminViewMode()">
+                </button>
+              </div>
+            </div>
           </div>
           <div id="adminProdutosList"></div>
         </div>
@@ -1135,13 +1153,9 @@ function showView(view) {
   } else if (view === 'admin') {
     document.getElementById('viewAdmin').classList.add('active');
     renderAdminProdutos();
-    if (window.innerWidth > 600) {
-      document.body.classList.add('admin-view-active');
-    }
   }
-  if (view !== 'admin') {
-    document.body.classList.remove('admin-view-active');
-  }
+  // Adiciona/remove classe no body para controlar estilos globais (como a nav inferior)
+  document.body.classList.toggle('admin-view-active', view === 'admin');
 }
 
 // Mostrar tela de login (ou admin direto se já autenticado)
@@ -1243,6 +1257,28 @@ function setViewMode(mode) {
   localStorage.setItem('viewMode', mode);
 }
 
+// Alterna o modo de visualização dos produtos no ADMIN
+function toggleAdminViewMode() {
+  const container = document.getElementById('adminProdutosList');
+  const isGridView = container.classList.contains('grid-view');
+  const newMode = isGridView ? 'list' : 'grid';
+  setAdminViewMode(newMode);
+}
+
+// Define o modo de visualização e atualiza o botão no ADMIN
+function setAdminViewMode(mode) {
+  const container = document.getElementById('adminProdutosList');
+  const toggleBtn = document.getElementById('admin-view-mode-toggle');
+  const gridIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path d="M4 4h6v6H4zm0 10h6v6H4zm10-10h6v6h-6zm0 10h6v6h-6z"/></svg>';
+  const listIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>';
+
+  container.classList.remove('list-view', 'grid-view');
+  container.classList.add(mode === 'grid' ? 'grid-view' : 'list-view');
+  toggleBtn.innerHTML = mode === 'grid' ? listIcon : gridIcon;
+
+  localStorage.setItem('adminViewMode', mode);
+}
+
 // Renderizar produtos na view cliente
 function renderProdutos() {
   const container = document.getElementById('produtosList');
@@ -1327,6 +1363,7 @@ function renderProdutos() {
 function renderAdminProdutos() {
   const container = document.getElementById('adminProdutosList');
   const termoBusca = document.getElementById('buscaAdmin')?.value.toLowerCase().trim() || '';
+  if (!container) return;
   container.innerHTML = '';
 
   if (estoque.length === 0) {
@@ -1775,6 +1812,9 @@ async function inicializarApp() {
   if (savedViewMode) {
     setViewMode(savedViewMode); // Usa a função que também atualiza o botão
   }
+
+  const savedAdminViewMode = localStorage.getItem('adminViewMode') || 'list';
+  setAdminViewMode(savedAdminViewMode);
 }
 
 inicializarApp();
