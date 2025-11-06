@@ -740,77 +740,77 @@
       </button>
     </div>
   </div>
+</div>
 
-  <!-- VIEW ADMIN -->
-  <div id="viewAdmin" class="view">
-    <div class="admin-layout">
-      <!-- Sidebar -->
-      <div class="admin-sidebar">
-        <div class="sidebar-header">
-          <h3>🛒 Pegue e Pague</h3>
-          <p>Painel Admin</p>
+<!-- VIEW ADMIN (movida para fora do .container para ocupar a tela inteira) -->
+<div id="viewAdmin" class="view">
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <div class="admin-sidebar">
+      <div class="sidebar-header">
+        <h3>🛒 Pegue e Pague</h3>
+        <p>Painel Admin</p>
+      </div>
+      <div class="admin-nav" id="adminNav">
+        <button class="btn-toggle active" onclick="showAdminSection('produtos')">📦 Produtos</button>
+        <button class="btn-toggle notif-btn" onclick="showAdminSection('sugestoes')">
+          💬 Sugestões <span id="sugestoesBadge" class="notif-count">0</span>
+        </button>
+        <button class="btn-toggle" onclick="showAdminSection('historico')">🧾 Histórico</button>
+      </div>
+      <div class="sidebar-footer">
+        <button class="btn btn-danger" onclick="logout()">🚪 Sair</button>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="admin-content">
+      <!-- Seção de Produtos -->
+      <div id="adminSectionProdutos" class="admin-section active">
+        <div class="admin-form">
+          <h3>➕ Adicionar Novo Produto</h3>
+          <div class="form-group">
+            <label>Nome do Produto</label>
+            <input type="text" id="produtoNome" placeholder="Ex: Coca-Cola 350ml">
+          </div>
+          <div class="form-group">
+            <label>Preço (R$)</label>
+            <input type="number" id="produtoPreco" step="0.01" placeholder="Ex: 5.50" min="0">
+          </div>
+          <div class="form-group">
+            <label>Quantidade em Estoque</label>
+            <input type="number" id="produtoQuantidade" placeholder="Ex: 50" min="0">
+          </div>
+          <button class="btn btn-success" onclick="adicionarProduto()">➕ Adicionar Produto</button>
         </div>
-        <div class="admin-nav" id="adminNav">
-          <button class="btn-toggle active" onclick="showAdminSection('produtos')">📦 Produtos</button>
-          <button class="btn-toggle notif-btn" onclick="showAdminSection('sugestoes')">
-            💬 Sugestões <span id="sugestoesBadge" class="notif-count">0</span>
-          </button>
-          <button class="btn-toggle" onclick="showAdminSection('historico')">🧾 Histórico</button>
-        </div>
-        <div class="sidebar-footer">
-          <button class="btn btn-danger" onclick="logout()">🚪 Sair</button>
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3>📦 Lista de Produtos</h3>
+            <input type="text" id="buscaAdmin" onkeyup="renderAdminProdutos()" placeholder="🔎 Buscar..." style="padding: 8px; border-radius: 8px; border: 2px solid #ddd; width: 40%;">
+          </div>
+          <div id="adminProdutosList"></div>
         </div>
       </div>
 
-      <!-- Content Area -->
-      <div class="admin-content">
-        <!-- Seção de Produtos -->
-        <div id="adminSectionProdutos" class="admin-section active">
-          <div class="admin-form">
-            <h3>➕ Adicionar Novo Produto</h3>
-            <div class="form-group">
-              <label>Nome do Produto</label>
-              <input type="text" id="produtoNome" placeholder="Ex: Coca-Cola 350ml">
+      <!-- Seção de Sugestões -->
+      <div id="adminSectionSugestoes" class="admin-section" style="display: none;">
+        <div class="admin-form">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap: wrap; gap: 10px;">
+            <h3>💬 Sugestões Recebidas</h3>
+            <div class="admin-header-actions">
+              <button class="btn btn-warning" onclick="marcarTodasComoLidas()">✔️ Marcar todas como lidas</button>
+              <button class="btn btn-danger" onclick="apagarSugestoesLidas()" style="margin-left:8px;">🗑️ Apagar lidas</button>
             </div>
-            <div class="form-group">
-              <label>Preço (R$)</label>
-              <input type="number" id="produtoPreco" step="0.01" placeholder="Ex: 5.50" min="0">
-            </div>
-            <div class="form-group">
-              <label>Quantidade em Estoque</label>
-              <input type="number" id="produtoQuantidade" placeholder="Ex: 50" min="0">
-            </div>
-            <button class="btn btn-success" onclick="adicionarProduto()">➕ Adicionar Produto</button>
           </div>
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <h3>📦 Lista de Produtos</h3>
-              <input type="text" id="buscaAdmin" onkeyup="renderAdminProdutos()" placeholder="🔎 Buscar..." style="padding: 8px; border-radius: 8px; border: 2px solid #ddd; width: 40%;">
-            </div>
-            <div id="adminProdutosList"></div>
-          </div>
+          <div id="sugestoesList"></div>
         </div>
+      </div>
 
-        <!-- Seção de Sugestões -->
-        <div id="adminSectionSugestoes" class="admin-section" style="display: none;">
-          <div class="admin-form">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap: wrap; gap: 10px;">
-              <h3>💬 Sugestões Recebidas</h3>
-              <div class="admin-header-actions">
-                <button class="btn btn-warning" onclick="marcarTodasComoLidas()">✔️ Marcar todas como lidas</button>
-                <button class="btn btn-danger" onclick="apagarSugestoesLidas()" style="margin-left:8px;">🗑️ Apagar lidas</button>
-              </div>
-            </div>
-            <div id="sugestoesList"></div>
-          </div>
-        </div>
-
-        <!-- Seção de Histórico -->
-        <div id="adminSectionHistorico" class="admin-section" style="display: none;">
-          <div class="admin-form">
-            <h3>🧾 Histórico de Compras</h3>
-            <div id="historicoList"></div>
-          </div>
+      <!-- Seção de Histórico -->
+      <div id="adminSectionHistorico" class="admin-section" style="display: none;">
+        <div class="admin-form">
+          <h3>🧾 Histórico de Compras</h3>
+          <div id="historicoList"></div>
         </div>
       </div>
     </div>
