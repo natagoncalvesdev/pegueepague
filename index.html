@@ -434,8 +434,8 @@
       }
       .admin-header-actions {
         flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
+        align-items: center;
+        gap: 12px;
         margin-top: 15px;
       }
       .admin-header-actions .btn {
@@ -679,11 +679,18 @@
     .view-mode-btn svg {
       fill: #495057;
     }
+    /* Layout base para ações no header do Admin */
+    .admin-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .view-mode-btn.active svg {
       fill: #28a745;
     }
 
-    /* Estilos para a visualização em Grade */
+    /* Estilos para a visualização em Grade (Cliente) */
     #produtosList.grid-view {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -706,9 +713,27 @@
       margin-top: auto; /* Empurra o botão para baixo */
     }
 
-    /* Estilos para a visualização em Grade no Admin */
+    /* Estilos para a visualização em Grade (Admin) */
+    #adminProdutosList.grid-view {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
     #adminProdutosList.grid-view .produto {
       flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+      padding: 20px;
+    }
+    #adminProdutosList.grid-view .produto-info {
+      flex-grow: 1;
+    }
+    #adminProdutosList.grid-view .produto-preco {
+      margin: 12px 0;
+    }
+    #adminProdutosList.grid-view .produto-actions {
+      justify-content: center;
+      margin-top: auto;
     }
   </style>
 </head>
