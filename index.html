@@ -480,6 +480,21 @@
         top: 20px;
         right: 10px;
       }
+
+      /* Centralização da seção Sugestões no Admin (Mobile) */
+      #adminSectionSugestoes .admin-form > div {
+        justify-content: center !important;
+        text-align: center;
+      }
+      #adminSectionSugestoes h3 {
+        width: 100%;
+        text-align: center;
+        margin: 0 auto 10px auto;
+      }
+      #adminSectionSugestoes .admin-header-actions {
+        width: 100%;
+        justify-content: center;
+      }
     }
 
     /* --- BARRA DE NAVEGAÇÃO INFERIOR (MOBILE ADMIN) --- */
@@ -716,14 +731,15 @@
     /* Estilos para a visualização em Grade (Admin) */
     #adminProdutosList.grid-view {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px; /* mais respiro entre os cards no desktop */
+      padding: 5px; /* pequeno respiro interno nas bordas do grid */
     }
     #adminProdutosList.grid-view .produto {
       flex-direction: column;
       align-items: stretch;
       text-align: center;
-      padding: 20px;
+      padding: 22px; /* leve aumento no padding interno para não ficar colado */
     }
     #adminProdutosList.grid-view .produto-info {
       flex-grow: 1;
