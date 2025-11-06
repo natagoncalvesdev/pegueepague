@@ -23,6 +23,13 @@
       padding: 20px;
     }
 
+    /* Remove padding do body quando a view admin estiver ativa em telas grandes */
+    @media (min-width: 601px) {
+      body.admin-view-active {
+        padding: 0;
+      }
+    }
+
     .container {
       max-width: 800px;
       margin: 0 auto;
@@ -529,6 +536,11 @@
       background: none; /* Remove fundo branco do container principal */
       box-shadow: none;
     }
+    /* Em telas grandes, o layout admin ocupa a tela toda */
+    @media (min-width: 601px) {
+      #viewAdmin .admin-layout { border-radius: 0; min-height: 100vh; }
+    }
+
     .admin-layout {
       display: flex;
       min-height: 80vh; /* Altura mínima para ocupar a tela */
@@ -658,11 +670,8 @@
         <input type="text" id="buscaCliente" onkeyup="renderProdutos()" placeholder="🔎 Buscar produto..." autocomplete="off">
       </div>
       <div class="view-mode-selector" style="margin-bottom: 0;">
-        <button id="btn-list-view" class="view-mode-btn active" onclick="setViewMode('list')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
-        </button>
-        <button id="btn-grid-view" class="view-mode-btn" onclick="setViewMode('grid')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path d="M4 4h6v6H4zm0 10h6v6H4zm10-10h6v6h-6zm0 10h6v6h-6z"/></svg>
+        <!-- Botão único que alterna a visualização -->
+        <button id="view-mode-toggle" class="view-mode-btn" onclick="toggleViewMode()">
         </button>
       </div>
     </div>
@@ -1050,6 +1059,12 @@ function showView(view) {
   } else if (view === 'admin') {
     document.getElementById('viewAdmin').classList.add('active');
     renderAdminProdutos();
+    if (window.innerWidth > 600) {
+      document.body.classList.add('admin-view-active');
+    }
+  }
+  if (view !== 'admin') {
+    document.body.classList.remove('admin-view-active');
   }
 }
 
@@ -1094,6 +1109,7 @@ function voltarParaCliente() {
   showView('cliente');
 }
 
+
 // Logout
 function logout() {
   isAdminLogged = false;
@@ -1119,18 +1135,32 @@ function showAdminSection(sectionName) {
 }
 const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
 
-// Altera o modo de visualização dos produtos (lista ou grade)
+// Alterna o modo de visualização dos produtos (lista/grade)
+function toggleViewMode() {
+  const container = document.getElementById('produtosList');
+  const isGridView = container.classList.contains('grid-view');
+  
+  // Se está em grade, muda para lista. Senão, muda para grade.
+  const newMode = isGridView ? 'list' : 'grid';
+  setViewMode(newMode);
+}
+
+// Define o modo de visualização e atualiza o botão
 function setViewMode(mode) {
   const container = document.getElementById('produtosList');
-  const btnList = document.getElementById('btn-list-view');
-  const btnGrid = document.getElementById('btn-grid-view');
+  const toggleBtn = document.getElementById('view-mode-toggle');
+  const gridIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path d="M4 4h6v6H4zm0 10h6v6H4zm10-10h6v6h-6zm0 10h6v6h-6z"/></svg>';
+  const listIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>';
 
-  container.classList.remove('list-view', 'grid-view');
-  btnList.classList.remove('active');
-  btnGrid.classList.remove('active');
-
-  container.classList.add(mode === 'grid' ? 'grid-view' : 'list-view');
-  document.getElementById(mode === 'grid' ? 'btn-grid-view' : 'btn-list-view').classList.add('active');
+  if (mode === 'grid') {
+    container.classList.remove('list-view');
+    container.classList.add('grid-view');
+    toggleBtn.innerHTML = listIcon; // Mostra o ícone para voltar para a lista
+  } else { // 'list'
+    container.classList.remove('grid-view');
+    container.classList.add('list-view');
+    toggleBtn.innerHTML = gridIcon; // Mostra o ícone para ir para a grade
+  }
   localStorage.setItem('viewMode', mode);
 }
 
@@ -1664,7 +1694,7 @@ async function inicializarApp() {
   // Define o modo de visualização preferido do usuário (list/grid)
   const savedViewMode = localStorage.getItem('viewMode');
   if (savedViewMode) {
-    setViewMode(savedViewMode);
+    setViewMode(savedViewMode); // Usa a função que também atualiza o botão
   }
 }
 
