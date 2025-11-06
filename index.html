@@ -434,6 +434,20 @@
       .admin-header-actions .btn {
         margin-left: 0 !important;
       }
+      /* Transforma sidebar em header no mobile */
+      .admin-layout { flex-direction: column; }
+      .admin-sidebar { width: 100%; height: auto; border-radius: 12px 12px 0 0; }
+      .admin-nav { flex-direction: row; justify-content: space-around; }
+      .admin-content { margin-left: 0; margin-top: 20px; }
+
+      /* Estilos para Grid/List view no mobile */
+      #produtosList.grid-view {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
+      }
+      #produtosList.grid-view .produto {
+        padding: 15px;
+      }
 
       .menu-container {
         top: 20px;
@@ -508,6 +522,114 @@
       color: #28a745;
       border-bottom-color: #28a745;
     }
+
+    /* Novo Layout Admin com Sidebar */
+    #viewAdmin {
+      padding: 0; /* Remove padding do container principal da view */
+      background: none; /* Remove fundo branco do container principal */
+      box-shadow: none;
+    }
+    .admin-layout {
+      display: flex;
+      min-height: 80vh; /* Altura mínima para ocupar a tela */
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      overflow: hidden; /* Garante que os cantos arredondados funcionem */
+    }
+    .admin-sidebar {
+      width: 240px;
+      background: #343a40; /* Cor escura para a sidebar */
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .sidebar-header {
+      text-align: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #495057;
+    }
+    .sidebar-header h3 { font-size: 1.5em; }
+    .sidebar-header p { color: #adb5bd; }
+    .admin-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+      flex-grow: 1; /* Ocupa o espaço disponível */
+    }
+    .admin-nav .btn-toggle {
+      width: 100%;
+      text-align: left;
+      color: #ced4da;
+      border-bottom: none; /* Remove a borda inferior do estilo antigo */
+      border-radius: 8px;
+    }
+    .admin-nav .btn-toggle:hover { background-color: #495057; color: white; }
+    .admin-nav .btn-toggle.active { background-color: #28a745; color: white; }
+    .sidebar-footer { margin-top: auto; } /* Empurra o footer para baixo */
+    .sidebar-footer .btn { width: 100%; }
+    .admin-content {
+      flex: 1; /* Ocupa o resto do espaço */
+      padding: 30px;
+      overflow-y: auto; /* Adiciona scroll se o conteúdo for grande */
+    }
+
+    /* Estilos para o seletor de visualização (Grid/Lista) */
+    .view-mode-selector {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    .view-mode-btn {
+      background: #e9ecef;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      padding: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .view-mode-btn:hover {
+      background: #ced4da;
+    }
+    .view-mode-btn.active {
+      background: #d4edda;
+      border-color: #28a745;
+    }
+    .view-mode-btn svg {
+      fill: #495057;
+    }
+    .view-mode-btn.active svg {
+      fill: #28a745;
+    }
+
+    /* Estilos para a visualização em Grade */
+    #produtosList.grid-view {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    #produtosList.grid-view .produto {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+      padding: 20px;
+    }
+    #produtosList.grid-view .produto-info {
+      flex-grow: 1; /* Faz com que o nome ocupe o espaço */
+    }
+    #produtosList.grid-view .produto-preco {
+      margin: 12px 0;
+    }
+    #produtosList.grid-view .produto-actions {
+      justify-content: center;
+      margin-top: auto; /* Empurra o botão para baixo */
+    }
   </style>
 </head>
 <body>
@@ -531,10 +653,20 @@
 
   <!-- VIEW CLIENTE -->
   <div id="viewCliente" class="view active">
-    <div class="form-group" style="margin-bottom: 20px;">
-      <input type="text" id="buscaCliente" onkeyup="renderProdutos()" placeholder="🔎 Buscar produto..." autocomplete="off">
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+      <div class="form-group" style="flex-grow: 1; margin-bottom: 0;">
+        <input type="text" id="buscaCliente" onkeyup="renderProdutos()" placeholder="🔎 Buscar produto..." autocomplete="off">
+      </div>
+      <div class="view-mode-selector" style="margin-bottom: 0;">
+        <button id="btn-list-view" class="view-mode-btn active" onclick="setViewMode('list')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+        </button>
+        <button id="btn-grid-view" class="view-mode-btn" onclick="setViewMode('grid')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path d="M4 4h6v6H4zm0 10h6v6H4zm10-10h6v6h-6zm0 10h6v6h-6z"/></svg>
+        </button>
+      </div>
     </div>
-    <div id="produtosList"></div>
+    <div id="produtosList" class="list-view"></div>
     
     <div class="total-container">
       <div class="total">Total: R$ <span id="total">0,00</span></div>
@@ -602,66 +734,75 @@
 
   <!-- VIEW ADMIN -->
   <div id="viewAdmin" class="view">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2>⚙️ Painel Administrativo</h2>
-      <button class="btn btn-secondary" onclick="logout()">🚪 Sair</button>
-    </div>
-
-    <!-- Navegação da Área Admin -->
-    <div class="view-toggle" id="adminNav">
-      <button class="btn-toggle active" onclick="showAdminSection('produtos')">📦 Produtos</button>
-      <button class="btn-toggle notif-btn" onclick="showAdminSection('sugestoes')">
-        💬 Sugestões <span id="sugestoesBadge" class="notif-count">0</span>
-      </button>
-      <button class="btn-toggle" onclick="showAdminSection('historico')">🧾 Histórico</button>
-    </div>
-
-    <!-- Seção de Produtos -->
-    <div id="adminSectionProdutos" class="admin-section active">
-      <div class="admin-form">
-        <h3>➕ Adicionar Novo Produto</h3>
-        <div class="form-group">
-          <label>Nome do Produto</label>
-          <input type="text" id="produtoNome" placeholder="Ex: Coca-Cola 350ml">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <div class="admin-sidebar">
+        <div class="sidebar-header">
+          <h3>🛒 Pegue e Pague</h3>
+          <p>Painel Admin</p>
         </div>
-        <div class="form-group">
-          <label>Preço (R$)</label>
-          <input type="number" id="produtoPreco" step="0.01" placeholder="Ex: 5.50" min="0">
+        <div class="admin-nav" id="adminNav">
+          <button class="btn-toggle active" onclick="showAdminSection('produtos')">📦 Produtos</button>
+          <button class="btn-toggle notif-btn" onclick="showAdminSection('sugestoes')">
+            💬 Sugestões <span id="sugestoesBadge" class="notif-count">0</span>
+          </button>
+          <button class="btn-toggle" onclick="showAdminSection('historico')">🧾 Histórico</button>
         </div>
-        <div class="form-group">
-          <label>Quantidade em Estoque</label>
-          <input type="number" id="produtoQuantidade" placeholder="Ex: 50" min="0">
+        <div class="sidebar-footer">
+          <button class="btn btn-danger" onclick="logout()">🚪 Sair</button>
         </div>
-        <button class="btn btn-success" onclick="adicionarProduto()">➕ Adicionar Produto</button>
       </div>
-      <div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <h3>📦 Lista de Produtos</h3>
-          <input type="text" id="buscaAdmin" onkeyup="renderAdminProdutos()" placeholder="🔎 Buscar..." style="padding: 8px; border-radius: 8px; border: 2px solid #ddd; width: 40%;">
-        </div>
-        <div id="adminProdutosList"></div>
-      </div>
-    </div>
 
-    <!-- Seção de Sugestões -->
-    <div id="adminSectionSugestoes" class="admin-section" style="display: none;">
-      <div class="admin-form">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap: wrap; gap: 10px;">
-          <h3>💬 Sugestões Recebidas</h3>
-          <div class="admin-header-actions">
-            <button class="btn btn-warning" onclick="marcarTodasComoLidas()">✔️ Marcar todas como lidas</button>
-            <button class="btn btn-danger" onclick="apagarSugestoesLidas()" style="margin-left:8px;">🗑️ Apagar lidas</button>
+      <!-- Content Area -->
+      <div class="admin-content">
+        <!-- Seção de Produtos -->
+        <div id="adminSectionProdutos" class="admin-section active">
+          <div class="admin-form">
+            <h3>➕ Adicionar Novo Produto</h3>
+            <div class="form-group">
+              <label>Nome do Produto</label>
+              <input type="text" id="produtoNome" placeholder="Ex: Coca-Cola 350ml">
+            </div>
+            <div class="form-group">
+              <label>Preço (R$)</label>
+              <input type="number" id="produtoPreco" step="0.01" placeholder="Ex: 5.50" min="0">
+            </div>
+            <div class="form-group">
+              <label>Quantidade em Estoque</label>
+              <input type="number" id="produtoQuantidade" placeholder="Ex: 50" min="0">
+            </div>
+            <button class="btn btn-success" onclick="adicionarProduto()">➕ Adicionar Produto</button>
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h3>📦 Lista de Produtos</h3>
+              <input type="text" id="buscaAdmin" onkeyup="renderAdminProdutos()" placeholder="🔎 Buscar..." style="padding: 8px; border-radius: 8px; border: 2px solid #ddd; width: 40%;">
+            </div>
+            <div id="adminProdutosList"></div>
           </div>
         </div>
-        <div id="sugestoesList"></div>
-      </div>
-    </div>
 
-    <!-- Seção de Histórico -->
-    <div id="adminSectionHistorico" class="admin-section" style="display: none;">
-      <div class="admin-form">
-        <h3>🧾 Histórico de Compras</h3>
-        <div id="historicoList"></div>
+        <!-- Seção de Sugestões -->
+        <div id="adminSectionSugestoes" class="admin-section" style="display: none;">
+          <div class="admin-form">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap: wrap; gap: 10px;">
+              <h3>💬 Sugestões Recebidas</h3>
+              <div class="admin-header-actions">
+                <button class="btn btn-warning" onclick="marcarTodasComoLidas()">✔️ Marcar todas como lidas</button>
+                <button class="btn btn-danger" onclick="apagarSugestoesLidas()" style="margin-left:8px;">🗑️ Apagar lidas</button>
+              </div>
+            </div>
+            <div id="sugestoesList"></div>
+          </div>
+        </div>
+
+        <!-- Seção de Histórico -->
+        <div id="adminSectionHistorico" class="admin-section" style="display: none;">
+          <div class="admin-form">
+            <h3>🧾 Histórico de Compras</h3>
+            <div id="historicoList"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -977,6 +1118,21 @@ function showAdminSection(sectionName) {
   if (sectionName === 'historico') renderHistoricoCompras();
 }
 const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+// Altera o modo de visualização dos produtos (lista ou grade)
+function setViewMode(mode) {
+  const container = document.getElementById('produtosList');
+  const btnList = document.getElementById('btn-list-view');
+  const btnGrid = document.getElementById('btn-grid-view');
+
+  container.classList.remove('list-view', 'grid-view');
+  btnList.classList.remove('active');
+  btnGrid.classList.remove('active');
+
+  container.classList.add(mode === 'grid' ? 'grid-view' : 'list-view');
+  document.getElementById(mode === 'grid' ? 'btn-grid-view' : 'btn-list-view').classList.add('active');
+  localStorage.setItem('viewMode', mode);
+}
 
 // Renderizar produtos na view cliente
 function renderProdutos() {
@@ -1504,6 +1660,12 @@ async function inicializarApp() {
   
   // Agora que os dados estão carregados, mostra a view do cliente
   showView('cliente');
+
+  // Define o modo de visualização preferido do usuário (list/grid)
+  const savedViewMode = localStorage.getItem('viewMode');
+  if (savedViewMode) {
+    setViewMode(savedViewMode);
+  }
 }
 
 inicializarApp();
