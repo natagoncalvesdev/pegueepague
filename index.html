@@ -751,6 +751,24 @@
       justify-content: center;
       margin-top: auto;
     }
+
+    /* --- Layout de edição de produtos no ADMIN --- */
+    .admin-content .produto-actions {
+      display: grid;
+      grid-template-rows: auto auto; /* inputs em cima, botões embaixo */
+      gap: 10px;
+      align-items: center;
+    }
+    .admin-content .admin-edit-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .admin-content .admin-edit-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
   </style>
 </head>
 <body>
@@ -1432,10 +1450,14 @@ function renderAdminProdutos() {
         <div class="produto-detalhes">Preço: R$ ${produto.preco.toFixed(2)} | Estoque: ${produto.quantidade} unidades</div>
       </div>
       <div class="produto-actions">
-        <input type="number" class="quantidade-input" id="qtdEdit_${produto.id}" value="${produto.quantidade}" min="0">
-        <input type="number" class="quantidade-input" id="precoEdit_${produto.id}" value="${produto.preco}" step="0.01" min="0">
-        <button class="btn btn-warning" onclick="salvarEdicao(${produto.id})">💾 Salvar</button>
-        <button class="btn btn-danger" onclick="removerProduto(${produto.id})">🗑️ Excluir</button>
+        <div class="admin-edit-inputs">
+          <input type="number" class="quantidade-input" id="qtdEdit_${produto.id}" value="${produto.quantidade}" min="0">
+          <input type="number" class="quantidade-input" id="precoEdit_${produto.id}" value="${produto.preco}" step="0.01" min="0">
+        </div>
+        <div class="admin-edit-actions">
+          <button class="btn btn-warning" onclick="salvarEdicao(${produto.id})">💾 Salvar</button>
+          <button class="btn btn-danger" onclick="removerProduto(${produto.id})">🗑️ Excluir</button>
+        </div>
       </div>
     `;
     container.appendChild(div);
