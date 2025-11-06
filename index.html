@@ -771,11 +771,12 @@
     .admin-inline-edit {
       display: flex;
       align-items: center;
-      flex-wrap: wrap;
+      flex-wrap: nowrap; /* mantém tudo em uma única linha */
       gap: 6px;
       margin-top: 6px;
       justify-content: center;
       width: 100%;
+      white-space: nowrap; /* evita quebra de linha do texto */
     }
     .admin-inline-edit .inline-input {
       padding: 4px 6px;
@@ -784,6 +785,7 @@
       background: #fff;
       text-align: center;
       font-size: 13px;
+      flex: 0 0 auto; /* não encolhe e não cresce, mantém largura fixa */
     }
     .admin-inline-edit .inline-input.preco { width: 70px; }
     .admin-inline-edit .inline-input.quantidade { width: 56px; }
