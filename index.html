@@ -765,8 +765,10 @@
     #adminProdutosList.list-view .produto-actions { justify-content: flex-start; }
     .admin-content .admin-edit-actions {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr; /* três botões lado a lado: Renomear, Salvar, Excluir */
       gap: 10px;
+      justify-items: stretch;
+      align-items: stretch;
     }
 
     /* Inputs inline para edição rápida no detalhe do produto */
@@ -781,7 +783,7 @@
       white-space: nowrap; /* evita quebra de linha do texto */
     }
     /* Em grid (blocos), centraliza a linha inline para visual mais equilibrado */
-    #adminProdutosList.grid-view .admin-inline-edit { justify-content: center; }
+    #adminProdutosList.grid-view .admin-inline-edit { justify-content: flex-start; }
     .admin-inline-edit .inline-input {
       padding: 4px 6px;
       border: 1px solid #ced4da;
@@ -1482,18 +1484,18 @@ function renderAdminProdutos() {
       <div class="produto-info" style="width: 100%;">
         <div class="produto-nome" style="display:flex; align-items:center; gap:8px;">
           <span id="nomeTexto_${produto.id}" style="font-weight: bold; font-size: 1.1em;">${produto.nome}</span>
-          <button class="btn btn-secondary" style="padding:6px 10px; font-size:12px;" onclick="toggleEditNome(${produto.id})">✏️ Renomear</button>
         </div>
         <div id="nomeEditWrap_${produto.id}" style="display:none; margin-top:8px;">
           <input type="text" id="nomeEdit_${produto.id}" value="${produto.nome}" style="padding: 6px 10px; width: 100%; border:1px solid #ced4da; border-radius:8px;" placeholder="Novo nome do produto">
         </div>
-        <div class="produto-detalhes admin-inline-edit" style="justify-content: space-around; margin-top:10px;">
+        <div class="produto-detalhes admin-inline-edit" style="justify-content: flex-start; margin-top:10px;">
           <label>Preço: <input type="number" class="inline-input preco" id="precoEdit_${produto.id}" value="${produto.preco}" step="0.01" min="0"></label>
           <label>Estoque: <input type="number" class="inline-input quantidade" id="qtdEdit_${produto.id}" value="${produto.quantidade}" min="0"></label>
         </div> 
       </div>
       <div class="produto-actions">
         <div class="admin-edit-actions">
+          <button class="btn btn-secondary" onclick="toggleEditNome(${produto.id})">✏️ Renomear</button>
           <button class="btn btn-warning" onclick="salvarEdicao(${produto.id})">💾 Salvar</button>
           <button class="btn btn-danger" onclick="removerProduto(${produto.id})">🗑️ Excluir</button>
         </div>
