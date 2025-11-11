@@ -1646,6 +1646,21 @@ function salvarEdicao(id) {
   alert('Produto atualizado com sucesso!');
 }
 
+// Alternar edição do nome (mostrar/ocultar campo de texto)
+function toggleEditNome(id) {
+  const wrap = document.getElementById(`nomeEditWrap_${id}`);
+  const input = document.getElementById(`nomeEdit_${id}`);
+  if (!wrap || !input) return;
+  const isHidden = wrap.style.display === 'none' || wrap.style.display === '';
+  wrap.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) {
+    try {
+      input.focus();
+      input.setSelectionRange(0, input.value.length);
+    } catch(e) {}
+  }
+}
+
 // Remover produto (admin)
 function removerProduto(id) {
   if (!confirm('Tem certeza que deseja excluir este produto?')) return;
