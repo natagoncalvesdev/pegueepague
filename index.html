@@ -1479,15 +1479,12 @@ function renderAdminProdutos() {
     const div = document.createElement('div');
     div.className = 'produto';
     div.innerHTML = `
-      <div class="produto-info">
-        <div class="produto-nome">${produto.nome}</div>
-        <div class="produto-detalhes admin-inline-edit">
-          <span>Preço:</span>
-          <input type="number" class="inline-input preco" id="precoEdit_${produto.id}" value="${produto.preco}" step="0.01" min="0">
-          <span style="margin: 0 6px;">|</span>
-          <span>Estoque:</span>
-          <input type="number" class="inline-input quantidade" id="qtdEdit_${produto.id}" value="${produto.quantidade}" min="0">
-        </div>
+      <div class="produto-info" style="width: 100%;">
+        <input type="text" class="form-group input" id="nomeEdit_${produto.id}" value="${produto.nome}" style="font-weight: bold; font-size: 1.1em; padding: 6px 10px; margin-bottom: 10px; width: 100%;">
+        <div class="produto-detalhes admin-inline-edit" style="justify-content: space-around;">
+          <label>Preço: <input type="number" class="inline-input preco" id="precoEdit_${produto.id}" value="${produto.preco}" step="0.01" min="0"></label>
+          <label>Estoque: <input type="number" class="inline-input quantidade" id="qtdEdit_${produto.id}" value="${produto.quantidade}" min="0"></label>
+        </div> 
       </div>
       <div class="produto-actions">
         <div class="admin-edit-actions">
@@ -1621,14 +1618,15 @@ function salvarEdicao(id) {
   const produto = estoque.find(p => p.id === id);
   if (!produto) return;
 
+  const novoNome = document.getElementById(`nomeEdit_${id}`).value.trim();
   const novaQuantidade = parseInt(document.getElementById(`qtdEdit_${id}`).value);
   const novoPreco = parseFloat(document.getElementById(`precoEdit_${id}`).value);
 
-  if (novaQuantidade < 0 || novoPreco < 0) {
+  if (!novoNome || novaQuantidade < 0 || novoPreco < 0) {
     alert('Valores inválidos!');
     return;
   }
-
+  produto.nome = novoNome;
   produto.quantidade = novaQuantidade;
   produto.preco = novoPreco;
 
